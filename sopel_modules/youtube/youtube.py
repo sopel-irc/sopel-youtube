@@ -3,6 +3,7 @@
 from __future__ import unicode_literals, division
 
 from sopel.module import rule, commands, example
+from sopel.config.types import StaticSection, ValidatedAttribute, NO_DEFAULT
 from sopel import tools
 import re
 import apiclient.discovery
@@ -11,7 +12,21 @@ regex = re.compile('(youtube.com/watch\S*v=|youtu.be/)([\w-]+)')
 API = None
 
 
+class YoutubeSection(StaticSection):
+    api_key = ValidatedAttribute('api_key', default=NO_DEFAULT)
+    """The Google API key to auth to the endpoint"""
+
+
+def configure(config):
+    config.define_section('youtube', YoutubeSection)
+    config.bugzilla.configure_setting(
+        'api_key',
+        'Enter your Google API key.',
+    )
+
+
 def setup(bot):
+    bot.config.define_section('youtube', YoutubeSection)
     if not bot.memory.contains('url_callbacks'):
         bot.memory['url_callbacks'] = tools.WillieMemory()
     bot.memory['url_callbacks'][regex] = get_info
