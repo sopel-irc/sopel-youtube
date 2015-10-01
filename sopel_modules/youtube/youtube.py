@@ -18,8 +18,8 @@ class YoutubeSection(StaticSection):
 
 
 def configure(config):
-    config.define_section('youtube', YoutubeSection)
-    config.bugzilla.configure_setting(
+    config.define_section('youtube', YoutubeSection, validate=False)
+    config.youtube.configure_setting(
         'api_key',
         'Enter your Google API key.',
     )
