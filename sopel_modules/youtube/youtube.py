@@ -19,7 +19,7 @@ class YoutubeSection(StaticSection):
 
 def configure(config):
     config.define_section('youtube', YoutubeSection)
-    config.bugzilla.configure_setting(
+    config.youtube.configure_setting(
         'api_key',
         'Enter your Google API key.',
     )
@@ -28,7 +28,7 @@ def configure(config):
 def setup(bot):
     bot.config.define_section('youtube', YoutubeSection)
     if not bot.memory.contains('url_callbacks'):
-        bot.memory['url_callbacks'] = tools.WillieMemory()
+        bot.memory['url_callbacks'] = tools.SopelMemory()
     bot.memory['url_callbacks'][regex] = get_info
     global API
     API = apiclient.discovery.build("youtube", "v3",
