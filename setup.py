@@ -36,7 +36,6 @@ setup(
     packages=find_packages('.'),
     namespace_packages=['sopel_modules'],
     include_package_data=True,
-    requires=requirements,
     install_requires=requirements,
     tests_require=dev_requirements,
     test_suite='tests',
