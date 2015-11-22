@@ -1,8 +1,10 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import os
 import sys
 from setuptools import setup, find_packages
+from sopel_modules.youtube import __version__
 
 
 if __name__ == '__main__':
@@ -27,7 +29,7 @@ with open('dev-requirements.txt') as dev_requirements_file:
 
 setup(
     name='sopel_modules.youtube',
-    version='0.1.0',
+    version=__version__,
     description='YouTube module for Sopel',
     long_description=readme + '\n\n' + history,
     author='E. Powell',
