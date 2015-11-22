@@ -7,8 +7,11 @@ from sopel.config.types import StaticSection, ValidatedAttribute, NO_DEFAULT
 from sopel.formatting import color, colors
 from sopel import tools
 import datetime
+import sys
 import re
 import apiclient.discovery
+if sys.version_info.major < 3:
+    int = long
 
 ISO8601_PERIOD_REGEX = re.compile(
     r"^(?P<sign>[+-])?"
@@ -92,7 +95,7 @@ def _say_result(bot, trigger, id_, include_link=True):
     message = (
         '[You' + color('Tube', colors.WHITE, colors.RED)  + '] '
         '{title} | Uploader: {uploader} | Uploaded: {uploaded} | '
-        'Length: {length} | Views: {views} | Comments: {comments}'
+        'Length: {length} | Views: {views:,} | Comments: {comments:,}'
     )
 
     snippet = result['snippet']
@@ -106,13 +109,15 @@ def _say_result(bot, trigger, id_, include_link=True):
         uploader=snippet['channelTitle'],
         length=duration,
         uploaded=uploaded,
-        views=statistics['viewCount'],
-        comments=statistics['commentCount'],
+        views=int(statistics['viewCount']),
+        comments=int(statistics['commentCount']),
     )
     if 'likeCount' in statistics:
-        message += ' | ' + color(statistics['likeCount'], colors.GREEN)
+        likes = int(statistics['likeCount'])
+        message += ' | ' + color('{:,}+'.format(likes), colors.GREEN)
     if 'dislikeCount' in statistics:
-        message += ' | ' + color(statistics['dislikeCount'], colors.RED)
+        dislikes = int(statistics['dislikeCount'])
+        message += ' | ' + color('{:,}-'.format(dislikes), colors.RED)
     if include_link:
         message = message + ' | Link: https://youtu.be/' + id_
     bot.say(message)
