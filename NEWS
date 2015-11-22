@@ -1,0 +1,5 @@
+Changes between 0.1.0 and 0.1.0
+===============================
+* Output is colorized
+* Fix configuration wizard
+* pip installation works regardless of pip version

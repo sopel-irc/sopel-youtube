@@ -9,5 +9,5 @@ from .youtube import *
 
 __author__ = 'E. Powell'
 __email__ = 'powell.518@gmail.com'
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
