@@ -95,7 +95,7 @@ def _say_result(bot, trigger, id_, include_link=True):
     message = (
         '[You' + color('Tube', colors.WHITE, colors.RED)  + '] '
         '{title} | Uploader: {uploader} | Uploaded: {uploaded} | '
-        'Length: {length} | Views: {views:,} | Comments: {comments:,}'
+        'Length: {length} | Views: {views:,} | Comments: {comments}'
     )
 
     snippet = result['snippet']
@@ -103,6 +103,9 @@ def _say_result(bot, trigger, id_, include_link=True):
     statistics = result['statistics']
     duration = _parse_duration(details['duration'])
     uploaded = _parse_published_at(bot, trigger, snippet['publishedAt'])
+    comments = statistics.get('commentCount', '-')
+    if comments != '-':
+        comments = '{:,}'.format(int(comments))
 
     message = message.format(
         title=snippet['title'],
@@ -110,7 +113,7 @@ def _say_result(bot, trigger, id_, include_link=True):
         length=duration,
         uploaded=uploaded,
         views=int(statistics['viewCount']),
-        comments=int(statistics['commentCount']),
+        comments=comments,
     )
     if 'likeCount' in statistics:
         likes = int(statistics['likeCount'])
