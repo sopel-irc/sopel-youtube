@@ -127,11 +127,22 @@ def _say_result(bot, trigger, id_, include_link=True):
 
 
 def _parse_duration(duration):
-    splitdur = ISO8601_PERIOD_REGEX.match(duration)
+    splitdur = ISO8601_PERIOD_REGEX.match(duration).groupdict()
     dur = []
-    for k, v in splitdur.groupdict().items():
-        if v is not None:
-            dur.append(v.lower())
+    if splitdur['y'] is not None:
+      dur.append(splitdur['y'].lower())
+    if splitdur['mo'] is not None:
+      dur.append(splitdur['mo'].lower())
+    if splitdur['w'] is not None:
+      dur.append(splitdur['w'].lower())
+    if splitdur['d'] is not None:
+      dur.append(splitdur['d'].lower())
+    if splitdur['h'] is not None:
+      dur.append(splitdur['h'].lower())
+    if splitdur['m'] is not None:
+      dur.append(splitdur['m'].lower())
+    if splitdur['s'] is not None:
+      dur.append(splitdur['s'].lower())
     return ' '.join(dur)
 
 
