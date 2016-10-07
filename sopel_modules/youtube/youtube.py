@@ -128,22 +128,11 @@ def _say_result(bot, trigger, id_, include_link=True):
 
 def _parse_duration(duration):
     splitdur = ISO8601_PERIOD_REGEX.match(duration).groupdict()
-    dur = []
-    if splitdur['y'] is not None:
-      dur.append(splitdur['y'].lower())
-    if splitdur['mo'] is not None:
-      dur.append(splitdur['mo'].lower())
-    if splitdur['w'] is not None:
-      dur.append(splitdur['w'].lower())
-    if splitdur['d'] is not None:
-      dur.append(splitdur['d'].lower())
-    if splitdur['h'] is not None:
-      dur.append(splitdur['h'].lower())
-    if splitdur['m'] is not None:
-      dur.append(splitdur['m'].lower())
-    if splitdur['s'] is not None:
-      dur.append(splitdur['s'].lower())
-    return ' '.join(dur)
+    dur = ""
+    for key in ['y','mo','w','d','h','m','s']:
+        if splitdur[key] is not None:
+            dur += splitdur[key] + " "
+    return dur.lower().strip()
 
 
 def _parse_published_at(bot, trigger, published):
