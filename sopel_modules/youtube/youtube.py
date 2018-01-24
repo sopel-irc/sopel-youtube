@@ -13,6 +13,9 @@ import apiclient.discovery
 if sys.version_info.major < 3:
     int = long
 
+from time import sleep
+from random import random
+
 ISO8601_PERIOD_REGEX = re.compile(
     r"^(?P<sign>[+-])?"
     r"P(?!\b)"
@@ -25,6 +28,7 @@ ISO8601_PERIOD_REGEX = re.compile(
     r"(?P<s>[0-9]+([,.][0-9]+)?S)?)?$")
 regex = re.compile('(youtube.com/watch\S*v=|youtu.be/)([\w-]+)')
 API = None
+num_retries = 5
 
 
 class YoutubeSection(StaticSection):
@@ -60,12 +64,18 @@ def search(bot, trigger):
     """Search YouTube"""
     if not trigger.group(2):
         return
-    results = API.search().list(
-        q=trigger.group(2),
-        type='video',
-        part='id,snippet',
-        maxResults=1,
-    ).execute()
+    for n in range(num_retries + 1):
+        try:
+            results = API.search().list(
+                q=trigger.group(2),
+                type='video',
+                part='id,snippet',
+                maxResults=1,
+            ).execute()
+        except ConnectionError:
+            sleep(random() * 2**n)
+            continue
+        break
     results = results.get('items')
     if not results:
         bot.say("I couldn't find any YouTube videos for your query.")
@@ -84,10 +94,16 @@ def get_info(bot, trigger, found_match=None):
 
 
 def _say_result(bot, trigger, id_, include_link=True):
-    result = API.videos().list(
-        id=id_,
-        part='snippet,contentDetails,statistics',
-    ).execute().get('items')
+    for n in range(num_retries + 1):
+        try:
+            result = API.videos().list(
+                id=id_,
+                part='snippet,contentDetails,statistics',
+            ).execute().get('items')
+        except ConnectionError:
+            sleep(random() * 2**n)
+            continue
+        break
     if not result:
         return
     result = result[0]
