@@ -73,6 +73,10 @@ def search(bot, trigger):
                 maxResults=1,
             ).execute()
         except ConnectionError:
+            if n >= num_retries:
+                bot.say('Maximum retries exceeded while searching YouTube for '
+                        '"{}", please try again later.'.format(trigger.group(2)))
+                return
             sleep(random() * 2**n)
             continue
         break
@@ -101,6 +105,10 @@ def _say_result(bot, trigger, id_, include_link=True):
                 part='snippet,contentDetails,statistics',
             ).execute().get('items')
         except ConnectionError:
+            if n >= num_retries:
+                bot.say('Maximum retries exceeded fetching YouTube video {},'
+                        ' please try again later.'.format(id_))
+                return
             sleep(random() * 2**n)
             continue
         break
