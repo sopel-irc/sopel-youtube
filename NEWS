@@ -1,4 +1,11 @@
-Changes between 0.1.0 and 0.1.0
+Changes between 0.1.1 and 0.1.2
+===============================
+* Fix error when video comments are disabled
+* Improve duration parser
+* Restrict google-api-python-client to compatible version range
+* Fix version-number import issue during installation
+
+Changes between 0.1.0 and 0.1.1
 ===============================
 * Output is colorized
 * Fix configuration wizard
