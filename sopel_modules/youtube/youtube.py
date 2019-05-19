@@ -42,7 +42,7 @@ def configure(config):
 
 def setup(bot):
     bot.config.define_section('youtube', YoutubeSection)
-    if not bot.memory.contains('url_callbacks'):
+    if 'url_callbacks' not in bot.memory:
         bot.memory['url_callbacks'] = tools.SopelMemory()
     bot.memory['url_callbacks'][regex] = get_info
     global API
