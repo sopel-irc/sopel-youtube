@@ -2,7 +2,7 @@
 """Youtube module for Sopel"""
 from __future__ import unicode_literals, division
 
-from sopel.module import rule, commands, example
+from sopel.module import commands, example, url
 from sopel.config.types import StaticSection, ValidatedAttribute, NO_DEFAULT
 from sopel.formatting import color, colors
 from sopel import tools
@@ -46,17 +46,10 @@ def configure(config):
 
 def setup(bot):
     bot.config.define_section('youtube', YoutubeSection)
-    if 'url_callbacks' not in bot.memory:
-        bot.memory['url_callbacks'] = tools.SopelMemory()
-    bot.memory['url_callbacks'][regex] = get_info
     global API
     API = apiclient.discovery.build("youtube", "v3",
                                     developerKey=bot.config.youtube.api_key,
                                     cache_discovery=False)
-
-
-def shutdown(bot):
-    del bot.memory['url_callbacks'][regex]
 
 
 @commands('yt', 'youtube')
@@ -89,12 +82,12 @@ def search(bot, trigger):
     _say_result(bot, trigger, results[0]['id']['videoId'])
 
 
-@rule('.*(youtube.com/watch\S*v=|youtu.be/)([\w-]+).*')
-def get_info(bot, trigger, found_match=None):
+@url(regex)
+def get_info(bot, trigger, match=None):
     """
     Get information about the latest video uploaded by the channel provided.
     """
-    match = found_match or trigger
+    match = match or trigger
     _say_result(bot, trigger, match.group(2), include_link=False)
 
 
@@ -162,5 +155,5 @@ def _parse_duration(duration):
 
 def _parse_published_at(bot, trigger, published):
     pubdate = datetime.datetime.strptime(published, '%Y-%m-%dT%H:%M:%S.%fZ')
-    return tools.time.format_time(bot.db, bot.config, nick=trigger.nick, 
+    return tools.time.format_time(bot.db, bot.config, nick=trigger.nick,
         channel=trigger.sender, time=pubdate)
