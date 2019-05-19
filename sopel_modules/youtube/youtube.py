@@ -47,7 +47,8 @@ def setup(bot):
     bot.memory['url_callbacks'][regex] = get_info
     global API
     API = apiclient.discovery.build("youtube", "v3",
-                                    developerKey=bot.config.youtube.api_key)
+                                    developerKey=bot.config.youtube.api_key,
+                                    cache_discovery=False)
 
 
 def shutdown(bot):
