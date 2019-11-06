@@ -1,20 +1,23 @@
 # coding=utf8
-"""Youtube module for Sopel"""
-from __future__ import unicode_literals, division
+"""YouTube module for Sopel"""
+from __future__ import unicode_literals, absolute_import, print_function, division
 
-from sopel.module import commands, example, url
-from sopel.config.types import StaticSection, ValidatedAttribute, NO_DEFAULT
-from sopel.formatting import color, colors
-from sopel import tools
 import datetime
 import sys
 import re
+from random import random
+from time import sleep
+
 import apiclient.discovery
+
+from sopel import tools
+from sopel.config.types import StaticSection, ValidatedAttribute, NO_DEFAULT
+from sopel.formatting import color, colors
+from sopel.module import commands, example, url
+
 if sys.version_info.major < 3:
     int = long
 
-from time import sleep
-from random import random
 
 ISO8601_PERIOD_REGEX = re.compile(
     r"^(?P<sign>[+-])?"
@@ -26,7 +29,7 @@ ISO8601_PERIOD_REGEX = re.compile(
     r"((?:T)(?P<h>[0-9]+([,.][0-9]+)?H)?"
     r"(?P<m>[0-9]+([,.][0-9]+)?M)?"
     r"(?P<s>[0-9]+([,.][0-9]+)?S)?)?$")
-regex = re.compile('(youtube.com/watch\S*v=|youtu.be/)([\w-]+)')
+regex = re.compile(r'(youtube.com/watch\S*v=|youtu.be/)([\w-]+)')
 API = None
 num_retries = 5
 
