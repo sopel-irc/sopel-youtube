@@ -30,7 +30,6 @@ ISO8601_PERIOD_REGEX = re.compile(
     r"(?P<m>[0-9]+([,.][0-9]+)?M)?"
     r"(?P<s>[0-9]+([,.][0-9]+)?S)?)?$")
 regex = re.compile(r'(youtube.com/watch\S*v=|youtu.be/)([\w-]+)')
-API = None
 num_retries = 5
 
 
@@ -49,10 +48,19 @@ def configure(config):
 
 def setup(bot):
     bot.config.define_section('youtube', YoutubeSection)
-    global API
-    API = apiclient.discovery.build("youtube", "v3",
-                                    developerKey=bot.config.youtube.api_key,
-                                    cache_discovery=False)
+    if 'youtube_api_client' not in bot.memory:
+        bot.memory['youtube_api_client'] = apiclient.discovery.build(
+            "youtube", "v3",
+            developerKey=bot.config.youtube.api_key,
+            cache_discovery=False)
+    else:
+        # If the memory key is already in use, either we have a plugin conflict
+        # or something has gone very wrong. Bail either way.
+        raise RuntimeError('youtube_api_client memory key already in use!')
+
+
+def shutdown(bot):
+    bot.memory.pop('youtube_api_client', None)
 
 
 @commands('yt', 'youtube')
@@ -63,7 +71,7 @@ def search(bot, trigger):
         return
     for n in range(num_retries + 1):
         try:
-            results = API.search().list(
+            results = bot.memory['youtube_api_client'].search().list(
                 q=trigger.group(2),
                 type='video',
                 part='id,snippet',
@@ -97,7 +105,7 @@ def get_info(bot, trigger, match=None):
 def _say_result(bot, trigger, id_, include_link=True):
     for n in range(num_retries + 1):
         try:
-            result = API.videos().list(
+            result = bot.memory['youtube_api_client'].videos().list(
                 id=id_,
                 part='snippet,contentDetails,statistics',
             ).execute().get('items')
