@@ -1,20 +1,23 @@
 # coding=utf8
-"""Youtube module for Sopel"""
-from __future__ import unicode_literals, division
+"""YouTube module for Sopel"""
+from __future__ import unicode_literals, absolute_import, print_function, division
 
-from sopel.module import rule, commands, example
-from sopel.config.types import StaticSection, ValidatedAttribute, NO_DEFAULT
-from sopel.formatting import color, colors
-from sopel import tools
 import datetime
 import sys
 import re
+from random import random
+from time import sleep
+
 import apiclient.discovery
+
+from sopel import tools
+from sopel.config.types import StaticSection, ValidatedAttribute, NO_DEFAULT
+from sopel.formatting import color, colors
+from sopel.module import commands, example, url
+
 if sys.version_info.major < 3:
     int = long
 
-from time import sleep
-from random import random
 
 ISO8601_PERIOD_REGEX = re.compile(
     r"^(?P<sign>[+-])?"
@@ -26,8 +29,7 @@ ISO8601_PERIOD_REGEX = re.compile(
     r"((?:T)(?P<h>[0-9]+([,.][0-9]+)?H)?"
     r"(?P<m>[0-9]+([,.][0-9]+)?M)?"
     r"(?P<s>[0-9]+([,.][0-9]+)?S)?)?$")
-regex = re.compile('(youtube.com/watch\S*v=|youtu.be/)([\w-]+)')
-API = None
+regex = re.compile(r'(youtube.com/watch\S*v=|youtu.be/)([\w-]+)')
 num_retries = 5
 
 
@@ -46,17 +48,19 @@ def configure(config):
 
 def setup(bot):
     bot.config.define_section('youtube', YoutubeSection)
-    if 'url_callbacks' not in bot.memory:
-        bot.memory['url_callbacks'] = tools.SopelMemory()
-    bot.memory['url_callbacks'][regex] = get_info
-    global API
-    API = apiclient.discovery.build("youtube", "v3",
-                                    developerKey=bot.config.youtube.api_key,
-                                    cache_discovery=False)
+    if 'youtube_api_client' not in bot.memory:
+        bot.memory['youtube_api_client'] = apiclient.discovery.build(
+            "youtube", "v3",
+            developerKey=bot.config.youtube.api_key,
+            cache_discovery=False)
+    else:
+        # If the memory key is already in use, either we have a plugin conflict
+        # or something has gone very wrong. Bail either way.
+        raise RuntimeError('youtube_api_client memory key already in use!')
 
 
 def shutdown(bot):
-    del bot.memory['url_callbacks'][regex]
+    bot.memory.pop('youtube_api_client', None)
 
 
 @commands('yt', 'youtube')
@@ -67,7 +71,7 @@ def search(bot, trigger):
         return
     for n in range(num_retries + 1):
         try:
-            results = API.search().list(
+            results = bot.memory['youtube_api_client'].search().list(
                 q=trigger.group(2),
                 type='video',
                 part='id,snippet',
@@ -89,19 +93,19 @@ def search(bot, trigger):
     _say_result(bot, trigger, results[0]['id']['videoId'])
 
 
-@rule('.*(youtube.com/watch\S*v=|youtu.be/)([\w-]+).*')
-def get_info(bot, trigger, found_match=None):
+@url(regex)
+def get_info(bot, trigger, match=None):
     """
     Get information about the latest video uploaded by the channel provided.
     """
-    match = found_match or trigger
+    match = match or trigger
     _say_result(bot, trigger, match.group(2), include_link=False)
 
 
 def _say_result(bot, trigger, id_, include_link=True):
     for n in range(num_retries + 1):
         try:
-            result = API.videos().list(
+            result = bot.memory['youtube_api_client'].videos().list(
                 id=id_,
                 part='snippet,contentDetails,statistics',
             ).execute().get('items')
@@ -162,5 +166,5 @@ def _parse_duration(duration):
 
 def _parse_published_at(bot, trigger, published):
     pubdate = datetime.datetime.strptime(published, '%Y-%m-%dT%H:%M:%S.%fZ')
-    return tools.time.format_time(bot.db, bot.config, nick=trigger.nick, 
+    return tools.time.format_time(bot.db, bot.config, nick=trigger.nick,
         channel=trigger.sender, time=pubdate)
