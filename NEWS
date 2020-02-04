@@ -1,3 +1,7 @@
+Changes between 0.1.3 and 0.2.0
+===============================
+* Update for Sopel 7 (#15)
+
 Changes between 0.1.2 and 0.1.3
 ===============================
 * Add retry mechanic to API fetching (#11)

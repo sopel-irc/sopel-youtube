@@ -1,6 +1,6 @@
-# Sopel YouTube Module
+# sopel-youtube
 
-YouTube module for Sopel
+YouTube plugin for Sopel
 
 ## Getting your API key
 Go to the [Google Developers Console](https://console.developers.google.com/)

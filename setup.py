@@ -8,7 +8,7 @@ from sopel_modules.youtube import __version__
 
 
 if __name__ == '__main__':
-    print('Sopel does not correctly load modules installed with setup.py '
+    print('Sopel does not correctly load plugins installed with setup.py '
           'directly. Please use "pip install .", or add {}/sopel_modules to '
           'core.extra in your config.'.format(
               os.path.dirname(os.path.abspath(__file__))),
@@ -30,7 +30,7 @@ with open('dev-requirements.txt') as dev_requirements_file:
 setup(
     name='sopel_modules.youtube',
     version=__version__,
-    description='YouTube module for Sopel',
+    description='YouTube plugin for Sopel',
     long_description=readme + '\n\n' + history,
     long_description_content_type='text/markdown',
     author='E. Powell',

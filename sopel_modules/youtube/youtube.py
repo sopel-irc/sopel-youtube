@@ -1,5 +1,5 @@
 # coding=utf8
-"""YouTube module for Sopel"""
+"""YouTube plugin for Sopel"""
 from __future__ import unicode_literals, absolute_import, print_function, division
 
 import datetime

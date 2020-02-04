@@ -1,7 +1,7 @@
 # coding=utf8
-"""Sopel YouTube Module
+"""sopel-youtube
 
-YouTube module for Sopel
+YouTube plugin for Sopel
 """
 from __future__ import unicode_literals, absolute_import, division, print_function
 
@@ -14,5 +14,5 @@ except ImportError:
 
 __author__ = 'E. Powell'
 __email__ = 'powell.518@gmail.com'
-__version__ = '0.1.3'
+__version__ = '0.2.0'
 
