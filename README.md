@@ -2,6 +2,22 @@
 
 YouTube plugin for Sopel
 
+## Installing
+
+If possible, use `pip` to install this plugin. Below are example commands; you
+might need to add `sudo` and/or call a different `pip` (e.g. `pip3`) depending
+on your system and environment. Do not use `setup.py install`; Sopel won't be
+able to load the plugin correctly.
+
+### Published release
+
+    pip install sopel_modules.youtube
+
+### From source
+
+    # Clone the repo, then run this in /path/to/sopel-youtube
+    pip install .
+
 ## Getting your API key
 Go to the [Google Developers Console](https://console.developers.google.com/)
 and create an application. When it's created, go to the APIs section, select
