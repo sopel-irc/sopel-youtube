@@ -143,8 +143,7 @@ def _say_result(bot, trigger, id_, include_link=True):
     details = result['contentDetails']
     statistics = result['statistics']
 
-    message = "[You" + color("Tube", colors.WHITE, colors.RED) + "] "
-    message += snippet["title"]
+    message = "[YouTube] " + snippet["title"]
 
     items = bot.config.youtube.info_items
     for item in items:
