@@ -165,6 +165,9 @@ def _parse_duration(duration):
 
 
 def _parse_published_at(bot, trigger, published):
-    pubdate = datetime.datetime.strptime(published, '%Y-%m-%dT%H:%M:%S.%fZ')
+    try:
+        pubdate = datetime.datetime.strptime(published, '%Y-%m-%dT%H:%M:%S.%fZ')
+    except ValueError:
+        pubdate = datetime.datetime.strptime(published, '%Y-%m-%dT%H:%M:%SZ')
     return tools.time.format_time(bot.db, bot.config, nick=trigger.nick,
         channel=trigger.sender, time=pubdate)
