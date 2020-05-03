@@ -14,5 +14,5 @@ except ImportError:
 
 __author__ = 'E. Powell'
 __email__ = 'powell.518@gmail.com'
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
