@@ -12,7 +12,7 @@ except ImportError:
     # no cause for alarm
     pass
 
-__author__ = 'E. Powell'
-__email__ = 'powell.518@gmail.com'
-__version__ = '0.3.0-dev'
+__author__ = 'dgw'
+__email__ = 'dgw@technobabbl.es'
+__version__ = '0.3.0'
 

@@ -1,3 +1,10 @@
+Changes between 0.2.1 and 0.3.0
+===============================
+* Allow configuring what video details to include (#18)
+* Remove outdated, ugly colors on "[YouTube]" output tag (#21)
+* Minor cleanup (regex patterns, package metadata)
+
+
 Changes between 0.2.0 and 0.2.1
 ===============================
 * Handle API sending wrongly formatted timestamps (#20)

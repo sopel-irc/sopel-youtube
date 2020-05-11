@@ -35,7 +35,7 @@ ISO8601_PERIOD_REGEX = re.compile(
     r"((?:T)(?P<h>[0-9]+([,.][0-9]+)?H)?"
     r"(?P<m>[0-9]+([,.][0-9]+)?M)?"
     r"(?P<s>[0-9]+([,.][0-9]+)?S)?)?$")
-regex = re.compile(r'(youtube.com/watch\S*v=|youtu.be/)([\w-]+)')
+regex = re.compile(r'(youtube\.com/watch\S*v=|youtu\.be/)([\w-]+)')
 num_retries = 5
 
 
