@@ -43,12 +43,9 @@ class YoutubeSection(StaticSection):
     api_key = ValidatedAttribute('api_key', default=NO_DEFAULT)
     """The Google API key to auth to the endpoint"""
 
-    color_logo = ValidatedAttribute("color_logo", bool, default=True)
-    """Color the YouTube text like the YouTube logo"""
-
     info_items = ListAttribute(
         "info_items",
-        default=["uploader", "date", "length", "views"],
+        default=["length", "uploader", "views", "date"],
     )
     """
     The items to include in the video info message, after site and title.
@@ -60,9 +57,6 @@ def configure(config):
     config.define_section('youtube', YoutubeSection, validate=False)
     config.youtube.configure_setting(
         "api_key", "Enter your Google API key.",
-    )
-    config.youtube.configure_setting(
-        "color_logo", "Use colored text for YouTube logo"
     )
     config.youtube.configure_setting(
         "info_items", "Which attributes to show in response to links"
@@ -149,10 +143,7 @@ def _say_result(bot, trigger, id_, include_link=True):
     details = result['contentDetails']
     statistics = result['statistics']
 
-    if bot.config.youtube.color_logo:
-        message = "[You" + color("Tube", colors.WHITE, colors.RED) + "] "
-    else:
-        message = "[YouTube] "
+    message = "[You" + color("Tube", colors.WHITE, colors.RED) + "] "
     message += snippet["title"]
 
     items = bot.config.youtube.info_items
