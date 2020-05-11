@@ -10,10 +10,16 @@ from time import sleep
 
 import apiclient.discovery
 
-from sopel import tools
-from sopel.config.types import StaticSection, ValidatedAttribute, NO_DEFAULT
+
+from sopel.config.types import (
+    ListAttribute,
+    StaticSection,
+    ValidatedAttribute,
+    NO_DEFAULT,
+)
 from sopel.formatting import color, colors
 from sopel.module import commands, example, url
+from sopel import tools
 
 if sys.version_info.major < 3:
     int = long
@@ -37,12 +43,23 @@ class YoutubeSection(StaticSection):
     api_key = ValidatedAttribute('api_key', default=NO_DEFAULT)
     """The Google API key to auth to the endpoint"""
 
+    info_items = ListAttribute(
+        "info_items",
+        default=["length", "uploader", "views", "date"],
+    )
+    """
+    The items to include in the video info message, after site and title.
+    Available: uploader, date, length, views, comments, and votes_color or votes
+    """
+
 
 def configure(config):
     config.define_section('youtube', YoutubeSection, validate=False)
     config.youtube.configure_setting(
-        'api_key',
-        'Enter your Google API key.',
+        "api_key", "Enter your Google API key.",
+    )
+    config.youtube.configure_setting(
+        "info_items", "Which attributes to show in response to links"
     )
 
 
@@ -121,35 +138,41 @@ def _say_result(bot, trigger, id_, include_link=True):
         return
     result = result[0]
 
-    message = (
-        '[You' + color('Tube', colors.WHITE, colors.RED)  + '] '
-        '{title} | Uploader: {uploader} | Uploaded: {uploaded} | '
-        'Length: {length} | Views: {views:,} | Comments: {comments}'
-    )
-
+    # Formatting
     snippet = result['snippet']
     details = result['contentDetails']
     statistics = result['statistics']
-    duration = _parse_duration(details['duration'])
-    uploaded = _parse_published_at(bot, trigger, snippet['publishedAt'])
-    comments = statistics.get('commentCount', '-')
-    if comments != '-':
-        comments = '{:,}'.format(int(comments))
 
-    message = message.format(
-        title=snippet['title'],
-        uploader=snippet['channelTitle'],
-        length=duration,
-        uploaded=uploaded,
-        views=int(statistics['viewCount']),
-        comments=comments,
-    )
-    if 'likeCount' in statistics:
-        likes = int(statistics['likeCount'])
-        message += ' | ' + color('{:,}+'.format(likes), colors.GREEN)
-    if 'dislikeCount' in statistics:
-        dislikes = int(statistics['dislikeCount'])
-        message += ' | ' + color('{:,}-'.format(dislikes), colors.RED)
+    message = "[You" + color("Tube", colors.WHITE, colors.RED) + "] "
+    message += snippet["title"]
+
+    items = bot.config.youtube.info_items
+    for item in items:
+        if item == "uploader":
+            message += " | Channel: " + snippet["channelTitle"]
+        elif item == "date":
+            message += " | " + _parse_published_at(bot, trigger, snippet["publishedAt"])
+        elif item == "length":
+            message += " | " + _parse_duration(details["duration"])
+        elif item == "views":
+            message += " | {:,} views".format(int(statistics["viewCount"]))
+        elif item == "comments" and "commentCount" in statistics:
+            message += " | {:,} comments".format(int(statistics["commentCount"]))
+        elif item == "votes_color":
+            if "likeCount" in statistics:
+                likes = int(statistics["likeCount"])
+                message += " | " + color("{:,}+".format(likes), colors.GREEN)
+            if "dislikeCount" in statistics:
+                dislikes = int(statistics["dislikeCount"])
+                message += " | " + color("{:,}-".format(dislikes), colors.RED)
+        elif item == "votes":
+            if "likeCount" in statistics:
+                likes = int(statistics["likeCount"])
+                message += " | {:,}+".format(likes)
+            if "dislikeCount" in statistics:
+                dislikes = int(statistics["dislikeCount"])
+                message += " | {:,}-".format(dislikes)
+
     if include_link:
         message = message + ' | Link: https://youtu.be/' + id_
     bot.say(message)
