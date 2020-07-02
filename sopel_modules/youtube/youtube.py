@@ -8,8 +8,8 @@ import re
 from random import random
 from time import sleep
 
-import apiclient.discovery
-
+import googleapiclient.discovery
+import googleapiclient.errors
 
 from sopel.config.types import (
     ListAttribute,
@@ -66,7 +66,7 @@ def configure(config):
 def setup(bot):
     bot.config.define_section('youtube', YoutubeSection)
     if 'youtube_api_client' not in bot.memory:
-        bot.memory['youtube_api_client'] = apiclient.discovery.build(
+        bot.memory['youtube_api_client'] = googleapiclient.discovery.build(
             "youtube", "v3",
             developerKey=bot.config.youtube.api_key,
             cache_discovery=False)
@@ -128,11 +128,18 @@ def _say_result(bot, trigger, id_, include_link=True):
             ).execute().get('items')
         except ConnectionError:
             if n >= num_retries:
-                bot.say('Maximum retries exceeded fetching YouTube video {},'
-                        ' please try again later.'.format(id_))
+                bot.say('Maximum retries exceeded fetching YouTube video {}, '
+                        'please try again later.'.format(id_))
                 return
             sleep(random() * 2**n)
             continue
+        except googleapiclient.errors.HttpError:
+            bot.say(
+                'API request failed. Please make sure my API key is enabled to '
+                'access YouTube. (If you recently enabled the YouTube service, '
+                'it could take a little while for the change to take effect.)'
+            )
+            return
         break
     if not result:
         return
