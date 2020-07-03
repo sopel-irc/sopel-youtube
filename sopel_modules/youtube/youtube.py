@@ -8,8 +8,8 @@ import re
 from random import random
 from time import sleep
 
-import apiclient.discovery
-
+import googleapiclient.discovery
+import googleapiclient.errors
 
 from sopel.config.types import (
     ListAttribute,
@@ -39,6 +39,25 @@ regex = re.compile(r'(youtube\.com/watch\S*v=|youtu\.be/)([\w-]+)')
 num_retries = 5
 
 
+def _get_http_error_message(exc):
+    if exc.resp.status == 403:
+        msg = (
+            'YouTube API key not authorized. Please make sure this key is '
+            'enabled to access YouTube. (Note: If you have recently made '
+            'changes to the API key\'s settings, they may take a few moments '
+            'to propagate across Google\'s network.)')
+    elif exc.resp.status == 400:
+        msg = (
+            'YouTube API rejected the configured key. Please make sure the key '
+            'has not been truncated or altered accidentally.')
+    else:
+        msg = (
+            'Error setting up YouTube API client. Please check service '
+            'status and/or verify API key configuration.')
+
+    return msg
+
+
 class YoutubeSection(StaticSection):
     api_key = ValidatedAttribute('api_key', default=NO_DEFAULT)
     """The Google API key to auth to the endpoint"""
@@ -66,10 +85,16 @@ def configure(config):
 def setup(bot):
     bot.config.define_section('youtube', YoutubeSection)
     if 'youtube_api_client' not in bot.memory:
-        bot.memory['youtube_api_client'] = apiclient.discovery.build(
-            "youtube", "v3",
-            developerKey=bot.config.youtube.api_key,
-            cache_discovery=False)
+        reason = None
+        try:
+            bot.memory['youtube_api_client'] = googleapiclient.discovery.build(
+                "youtube", "v3",
+                developerKey=bot.config.youtube.api_key,
+                cache_discovery=False)
+        except googleapiclient.errors.HttpError as e:
+            reason = _get_http_error_message(e)
+        if reason:  # TODO: Replace with `raise ... from` when dropping py2
+            raise ValueError(reason)
     else:
         # If the memory key is already in use, either we have a plugin conflict
         # or something has gone very wrong. Bail either way.
@@ -128,11 +153,14 @@ def _say_result(bot, trigger, id_, include_link=True):
             ).execute().get('items')
         except ConnectionError:
             if n >= num_retries:
-                bot.say('Maximum retries exceeded fetching YouTube video {},'
-                        ' please try again later.'.format(id_))
+                bot.say('Maximum retries exceeded fetching YouTube video {}, '
+                        'please try again later.'.format(id_))
                 return
             sleep(random() * 2**n)
             continue
+        except googleapiclient.errors.HttpError as e:
+            bot.say(_get_http_error_message(e))
+            return
         break
     if not result:
         return
