@@ -1,3 +1,8 @@
+Changes between 0.3.0 and 0.3.1
+===============================
+* Override handling of rare API errors reported to output the key (#23)
+
+
 Changes between 0.2.1 and 0.3.0
 ===============================
 * Allow configuring what video details to include (#18)
@@ -9,9 +14,11 @@ Changes between 0.2.0 and 0.2.1
 ===============================
 * Handle API sending wrongly formatted timestamps (#20)
 
+
 Changes between 0.1.3 and 0.2.0
 ===============================
 * Update for Sopel 7 (#15)
+
 
 Changes between 0.1.2 and 0.1.3
 ===============================
@@ -19,12 +26,14 @@ Changes between 0.1.2 and 0.1.3
 * Fix exception traceback sometimes thrown on reconnect (#14)
 * Update ancient, deprecated usage of Sopel's memory API (#16)
 
+
 Changes between 0.1.1 and 0.1.2
 ===============================
 * Fix error when video comments are disabled
 * Improve duration parser
 * Restrict google-api-python-client to compatible version range
 * Fix version-number import issue during installation
+
 
 Changes between 0.1.0 and 0.1.1
 ===============================
