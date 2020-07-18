@@ -20,6 +20,7 @@ from sopel.config.types import (
 from sopel.formatting import color, colors
 from sopel.module import commands, example, url
 from sopel import tools
+from sopel.tools import time
 
 if sys.version_info.major < 3:
     int = long
