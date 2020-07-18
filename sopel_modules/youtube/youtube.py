@@ -1,11 +1,11 @@
 # coding=utf8
 """YouTube plugin for Sopel"""
-from __future__ import unicode_literals, absolute_import, print_function, division
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import datetime
-import sys
-import re
 from random import random
+import re
+import sys
 from time import sleep
 
 import googleapiclient.discovery
@@ -19,8 +19,8 @@ from sopel.config.types import (
 )
 from sopel.formatting import color, colors
 from sopel.module import commands, example, url
-from sopel import tools
-from sopel.tools import time
+import sopel.tools as tools
+import sopel.tools.time
 
 if sys.version_info.major < 3:
     int = long
