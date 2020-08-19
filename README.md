@@ -1,6 +1,6 @@
 # sopel-youtube
 
-YouTube plugin for Sopel
+YouTube info plugin for Sopel
 
 ## Installing
 
@@ -26,3 +26,22 @@ select "Add credentials", pick "API key", and then "Server key". You can enter
 a name for it and limit the IPs it can be used from, but you don't have to.
 Copy the value it gives you into the prompt in the config wizard, or the
 `api_key` value of the config in the `[youtube]` section.
+
+## Config settings
+`sopel-youtube` supports Sopel's interactive configuration wizard:
+
+    sopel-plugins configure youtube
+
+The `api_key` option is self-explanatory (see above).
+
+By default, only the video length, uploader (channel name), view count, and
+upload date are shown. The included items, and the order in which they appear,
+depend on the `info_items` setting, which is a list of keywords. Unrecognized
+keywords are simply ignored. Supported `info_items` are:
+
+* `comments` (comment count)
+* `date` (upload time/date)
+* `length` (duration)
+* `uploader` (channel name)
+* `views` (view count)
+* `votes_color` or `votes` (likes/dislikes, with or without IRC formatting)
