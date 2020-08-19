@@ -2,7 +2,7 @@
 """YouTube plugin for Sopel"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import datetime
+from datetime import datetime
 from random import random
 import re
 import sys
@@ -149,14 +149,17 @@ def _say_result(bot, trigger, id_, include_link=True):
         try:
             result = bot.memory['youtube_api_client'].videos().list(
                 id=id_,
-                part='snippet,contentDetails,statistics',
+                part='snippet,contentDetails,liveStreamingDetails,statistics',
                 fields=
                     'items('
                         'snippet('
-                            'title,channelTitle,publishedAt'
+                            'title,channelTitle,liveBroadcastContent,publishedAt'
                         '),'
                         'contentDetails('
                             'duration'
+                        '),'
+                        'liveStreamingDetails('
+                            'actualStartTime,concurrentViewers,scheduledStartTime'
                         '),'
                         'statistics('
                             'viewCount,commentCount,likeCount,dislikeCount'
@@ -182,6 +185,8 @@ def _say_result(bot, trigger, id_, include_link=True):
     snippet = result['snippet']
     details = result['contentDetails']
     statistics = result['statistics']
+    live_info = result.get('liveStreamingDetails', None)
+    live_status = snippet["liveBroadcastContent"]
 
     message = "[YouTube] " + snippet["title"]
 
@@ -190,13 +195,44 @@ def _say_result(bot, trigger, id_, include_link=True):
         if item == "uploader":
             message += " | Channel: " + snippet["channelTitle"]
         elif item == "date":
-            message += " | " + _parse_published_at(bot, trigger, snippet["publishedAt"])
+            if live_status == "none":
+                # standard video uploaded in the normal way
+                message += " | " + _format_datetime(bot, trigger, snippet["publishedAt"])
+            elif live_status == "upcoming":
+                # scheduled live stream; show the scheduled start time
+                message += " | Scheduled for " + _format_datetime(
+                    bot, trigger, live_info["scheduledStartTime"])
+            elif live_status == "live":
+                # currently live; show when the stream started
+                message += " | Live since " + _format_datetime(
+                    bot, trigger, live_info["actualStartTime"])
         elif item == "length":
-            message += " | " + _parse_duration(details["duration"])
+            if live_status == "none":
+                # standard video uploaded in the normal way
+                message += " | " + _parse_duration(details["duration"])
+            elif live_status == "upcoming":
+                # skip duration for upcoming broadcasts; they have no length yet
+                continue
+            elif live_status == "live":
+                # currently live; show how long it's been since the start time
+                message += " | Live for " + tools.time.seconds_to_human(
+                    datetime.utcnow() - _parse_datetime(live_info["actualStartTime"])
+                    )[:-4]  # Sopel should make the leading "in"/trailing "ago" optional
         elif item == "views":
-            message += " | {:,} views".format(int(statistics["viewCount"]))
+            if live_status == "none":
+                message += " | {:,} views".format(int(statistics["viewCount"]))
+            elif live_status == "upcoming":
+                # users can "wait" for a live stream to start, and YouTube will show
+                # how many there are on the video page, but that info doesn't appear
+                # to be available in API responses (scumbag move alert)
+                continue
+            elif live_status == "live":
+                message += " | {:,} watching".format(int(live_info["concurrentViewers"]))
         elif item == "comments" and "commentCount" in statistics:
-            message += " | {:,} comments".format(int(statistics["commentCount"]))
+            if live_status == "none":
+                # live videos tend to have chats, not comments, so only show this
+                # if the video is not live-streaming
+                message += " | {:,} comments".format(int(statistics["commentCount"]))
         elif item == "votes_color":
             if "likeCount" in statistics:
                 likes = int(statistics["likeCount"])
@@ -226,10 +262,16 @@ def _parse_duration(duration):
     return dur.lower().strip()
 
 
-def _parse_published_at(bot, trigger, published):
+def _parse_datetime(date):
     try:
-        pubdate = datetime.datetime.strptime(published, '%Y-%m-%dT%H:%M:%S.%fZ')
+        dt = datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%fZ')
     except ValueError:
-        pubdate = datetime.datetime.strptime(published, '%Y-%m-%dT%H:%M:%SZ')
+        dt = datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ')
+    return dt
+
+
+def _format_datetime(bot, trigger, date):
+    if type(date) != 'datetime':
+        date = _parse_datetime(date)
     return tools.time.format_time(bot.db, bot.config, nick=trigger.nick,
-        channel=trigger.sender, time=pubdate)
+        channel=trigger.sender, time=date)
