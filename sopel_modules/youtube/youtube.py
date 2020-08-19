@@ -117,7 +117,8 @@ def search(bot, trigger):
             results = bot.memory['youtube_api_client'].search().list(
                 q=trigger.group(2),
                 type='video',
-                part='id,snippet',
+                part='id',
+                fields='items(id(videoId))',
                 maxResults=1,
             ).execute()
         except ConnectionError:
@@ -138,9 +139,7 @@ def search(bot, trigger):
 
 @url(regex)
 def get_info(bot, trigger, match=None):
-    """
-    Get information about the latest video uploaded by the channel provided.
-    """
+    """Get information about the linked YouTube video."""
     match = match or trigger
     _say_result(bot, trigger, match.group(2), include_link=False)
 
@@ -151,6 +150,18 @@ def _say_result(bot, trigger, id_, include_link=True):
             result = bot.memory['youtube_api_client'].videos().list(
                 id=id_,
                 part='snippet,contentDetails,statistics',
+                fields=
+                    'items('
+                        'snippet('
+                            'title,channelTitle,publishedAt'
+                        '),'
+                        'contentDetails('
+                            'duration'
+                        '),'
+                        'statistics('
+                            'viewCount,commentCount,likeCount,dislikeCount'
+                        ')'
+                    ')',
             ).execute().get('items')
         except ConnectionError:
             if n >= num_retries:
