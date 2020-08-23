@@ -1,3 +1,9 @@
+Changes between 0.3.1 and 0.3.2
+===============================
+* Clean up some problematic imports (#25)
+* Request only the necessary data fields from YouTube API (#27)
+
+
 Changes between 0.3.0 and 0.3.1
 ===============================
 * Override handling of rare API errors reported to output the key (#23)
