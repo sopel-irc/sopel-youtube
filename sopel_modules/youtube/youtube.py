@@ -37,6 +37,7 @@ ISO8601_PERIOD_REGEX = re.compile(
     r"(?P<m>[0-9]+([,.][0-9]+)?M)?"
     r"(?P<s>[0-9]+([,.][0-9]+)?S)?)?$")
 video_regex = re.compile(r'(youtube\.com/watch\S*v=|youtu\.be/)([\w-]+)')
+playlist_regex = re.compile(r'youtube\.com/playlist\S*list=([\w-]+)')
 num_retries = 5
 
 
@@ -215,6 +216,56 @@ def _say_video_result(bot, trigger, id_, include_link=True):
     if include_link:
         message = message + ' | Link: https://youtu.be/' + id_
     bot.say(message)
+
+
+@url(playlist_regex)
+def get_playlist_info(bot, trigger, match):
+    """Get information about the linked YouTube playlist."""
+    match = match or trigger
+    _say_playlist_result(bot, trigger, match.group(1))
+
+
+def _say_playlist_result(bot, trigger, id_):
+    for n in range(num_retries + 1):
+        try:
+            result = bot.memory['youtube_api_client'].playlists().list(
+                id=id_,
+                part='snippet,contentDetails',
+                fields=
+                    'items('
+                        'snippet('
+                            'title,channelTitle,publishedAt'
+                        '),'
+                        'contentDetails('
+                            'itemCount'
+                        ')'
+                    ')',
+            ).execute().get('items')
+        except ConnectionError:
+            if n >= num_retries:
+                bot.say('Maximum retries exceeded fetching YouTube playlist {}, '
+                        'please try again later.'.format(id_))
+                return
+            sleep(random() * 2**n)
+            continue
+        except googleapiclient.errors.HttpError as e:
+            bot.say(_get_http_error_message(e))
+            return
+        break
+    if not result:
+        return
+    result = result[0]
+
+    snippet = result['snippet']
+    snippet['itemCount'] = result['contentDetails']['itemCount']  # cheating
+
+    bot.say(
+        "[YouTube] {snippet[title]} | Playlist by {snippet[channelTitle]} | "
+        "{snippet[itemCount]} items | Created {pubDate}".format(
+            snippet=snippet,
+            pubDate=_parse_published_at(bot, trigger, snippet['publishedAt']),
+        )
+    )
 
 
 def _parse_duration(duration):
