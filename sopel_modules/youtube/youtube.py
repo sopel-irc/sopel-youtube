@@ -36,7 +36,7 @@ ISO8601_PERIOD_REGEX = re.compile(
     r"((?:T)(?P<h>[0-9]+([,.][0-9]+)?H)?"
     r"(?P<m>[0-9]+([,.][0-9]+)?M)?"
     r"(?P<s>[0-9]+([,.][0-9]+)?S)?)?$")
-regex = re.compile(r'(youtube\.com/watch\S*v=|youtu\.be/)([\w-]+)')
+video_regex = re.compile(r'(youtube\.com/watch\S*v=|youtu\.be/)([\w-]+)')
 num_retries = 5
 
 
@@ -79,7 +79,7 @@ def configure(config):
         "api_key", "Enter your Google API key.",
     )
     config.youtube.configure_setting(
-        "info_items", "Which attributes to show in response to links"
+        "info_items", "Which attributes to show in response to video links"
     )
 
 
@@ -108,7 +108,7 @@ def shutdown(bot):
 
 @commands('yt', 'youtube')
 @example('.yt how to be a nerdfighter FAQ')
-def search(bot, trigger):
+def video_search(bot, trigger):
     """Search YouTube"""
     if not trigger.group(2):
         return
@@ -134,17 +134,17 @@ def search(bot, trigger):
         bot.say("I couldn't find any YouTube videos for your query.")
         return
 
-    _say_result(bot, trigger, results[0]['id']['videoId'])
+    _say_video_result(bot, trigger, results[0]['id']['videoId'])
 
 
-@url(regex)
-def get_info(bot, trigger, match=None):
+@url(video_regex)
+def get_video_info(bot, trigger, match=None):
     """Get information about the linked YouTube video."""
     match = match or trigger
-    _say_result(bot, trigger, match.group(2), include_link=False)
+    _say_video_result(bot, trigger, match.group(2), include_link=False)
 
 
-def _say_result(bot, trigger, id_, include_link=True):
+def _say_video_result(bot, trigger, id_, include_link=True):
     for n in range(num_retries + 1):
         try:
             result = bot.memory['youtube_api_client'].videos().list(
