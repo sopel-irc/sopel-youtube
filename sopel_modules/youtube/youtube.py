@@ -37,7 +37,7 @@ ISO8601_PERIOD_REGEX = re.compile(
     r"(?P<m>[0-9]+([,.][0-9]+)?M)?"
     r"(?P<s>[0-9]+([,.][0-9]+)?S)?)?$")
 video_regex = re.compile(r'(youtube\.com/watch\S*v=|youtu\.be/)([\w-]+)')
-playlist_regex = re.compile(r'youtube\.com/playlist\S*list=([\w-]+)')
+playlist_regex = re.compile(r'youtube\.com/(playlist|watch)\S*list=([\w-]+)')
 num_retries = 5
 
 
@@ -73,6 +73,11 @@ class YoutubeSection(StaticSection):
     Available: uploader, date, length, views, comments, and votes_color or votes
     """
 
+    playlist_watch = ValidatedAttribute('playlist_watch', bool, default=True)
+    """
+    Whether to show playlist info if the list ID is embedded in a video watch link.
+    """
+
 
 def configure(config):
     config.define_section('youtube', YoutubeSection, validate=False)
@@ -81,6 +86,9 @@ def configure(config):
     )
     config.youtube.configure_setting(
         "info_items", "Which attributes to show in response to video links"
+    )
+    config.youtube.configure_setting(
+        "playlist_watch", "Show playlist info if embedded in video links?"
     )
 
 
@@ -222,7 +230,9 @@ def _say_video_result(bot, trigger, id_, include_link=True):
 def get_playlist_info(bot, trigger, match):
     """Get information about the linked YouTube playlist."""
     match = match or trigger
-    _say_playlist_result(bot, trigger, match.group(1))
+    if match.group(1) == 'watch' and not bot.config.youtube.playlist_watch:
+        return
+    _say_playlist_result(bot, trigger, match.group(2))
 
 
 def _say_playlist_result(bot, trigger, id_):
