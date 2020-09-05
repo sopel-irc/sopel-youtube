@@ -36,7 +36,8 @@ ISO8601_PERIOD_REGEX = re.compile(
     r"((?:T)(?P<h>[0-9]+([,.][0-9]+)?H)?"
     r"(?P<m>[0-9]+([,.][0-9]+)?M)?"
     r"(?P<s>[0-9]+([,.][0-9]+)?S)?)?$")
-regex = re.compile(r'(youtube\.com/watch\S*v=|youtu\.be/)([\w-]+)')
+video_regex = re.compile(r'(youtube\.com/watch\S*v=|youtu\.be/)([\w-]+)')
+playlist_regex = re.compile(r'youtube\.com/(playlist|watch)\S*list=([\w-]+)')
 num_retries = 5
 
 
@@ -72,6 +73,11 @@ class YoutubeSection(StaticSection):
     Available: uploader, date, length, views, comments, and votes_color or votes
     """
 
+    playlist_watch = ValidatedAttribute('playlist_watch', bool, default=True)
+    """
+    Whether to show playlist info if the list ID is embedded in a video watch link.
+    """
+
 
 def configure(config):
     config.define_section('youtube', YoutubeSection, validate=False)
@@ -79,7 +85,10 @@ def configure(config):
         "api_key", "Enter your Google API key.",
     )
     config.youtube.configure_setting(
-        "info_items", "Which attributes to show in response to links"
+        "info_items", "Which attributes to show in response to video links"
+    )
+    config.youtube.configure_setting(
+        "playlist_watch", "Show playlist info if embedded in video links?"
     )
 
 
@@ -108,7 +117,7 @@ def shutdown(bot):
 
 @commands('yt', 'youtube')
 @example('.yt how to be a nerdfighter FAQ')
-def search(bot, trigger):
+def video_search(bot, trigger):
     """Search YouTube"""
     if not trigger.group(2):
         return
@@ -134,17 +143,17 @@ def search(bot, trigger):
         bot.say("I couldn't find any YouTube videos for your query.")
         return
 
-    _say_result(bot, trigger, results[0]['id']['videoId'])
+    _say_video_result(bot, trigger, results[0]['id']['videoId'])
 
 
-@url(regex)
-def get_info(bot, trigger, match=None):
+@url(video_regex)
+def get_video_info(bot, trigger, match=None):
     """Get information about the linked YouTube video."""
     match = match or trigger
-    _say_result(bot, trigger, match.group(2), include_link=False)
+    _say_video_result(bot, trigger, match.group(2), include_link=False)
 
 
-def _say_result(bot, trigger, id_, include_link=True):
+def _say_video_result(bot, trigger, id_, include_link=True):
     for n in range(num_retries + 1):
         try:
             result = bot.memory['youtube_api_client'].videos().list(
@@ -215,6 +224,65 @@ def _say_result(bot, trigger, id_, include_link=True):
     if include_link:
         message = message + ' | Link: https://youtu.be/' + id_
     bot.say(message)
+
+
+@url(playlist_regex)
+def get_playlist_info(bot, trigger, match):
+    """Get information about the linked YouTube playlist."""
+    match = match or trigger
+    if match.group(1) == 'watch' and not bot.config.youtube.playlist_watch:
+        return
+    _say_playlist_result(bot, trigger, match.group(2))
+
+
+def _say_playlist_result(bot, trigger, id_):
+    if not id_ or id_.upper() == 'WL':
+        # The playlist with ID of WL is valid only for an authenticated user.
+        # Someone probably linked a video they opened from their Watch Later,
+        # but we can't get any info about their queue. Silently ignore.
+        # Also silently ignore empty/falsy/None IDs, just in case.
+        return
+
+    for n in range(num_retries + 1):
+        try:
+            result = bot.memory['youtube_api_client'].playlists().list(
+                id=id_,
+                part='snippet,contentDetails',
+                fields=
+                    'items('
+                        'snippet('
+                            'title,channelTitle,publishedAt'
+                        '),'
+                        'contentDetails('
+                            'itemCount'
+                        ')'
+                    ')',
+            ).execute().get('items')
+        except ConnectionError:
+            if n >= num_retries:
+                bot.say('Maximum retries exceeded fetching YouTube playlist {}, '
+                        'please try again later.'.format(id_))
+                return
+            sleep(random() * 2**n)
+            continue
+        except googleapiclient.errors.HttpError as e:
+            bot.say(_get_http_error_message(e))
+            return
+        break
+    if not result:
+        return
+    result = result[0]
+
+    snippet = result['snippet']
+    snippet['itemCount'] = result['contentDetails']['itemCount']  # cheating
+
+    bot.say(
+        "[YouTube] {snippet[title]} | Playlist by {snippet[channelTitle]} | "
+        "{snippet[itemCount]} items | Created {pubDate}".format(
+            snippet=snippet,
+            pubDate=_parse_published_at(bot, trigger, snippet['publishedAt']),
+        )
+    )
 
 
 def _parse_duration(duration):
