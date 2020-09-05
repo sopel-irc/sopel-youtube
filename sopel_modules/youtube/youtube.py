@@ -236,6 +236,13 @@ def get_playlist_info(bot, trigger, match):
 
 
 def _say_playlist_result(bot, trigger, id_):
+    if not id_ or id_.upper() == 'WL':
+        # The playlist with ID of WL is valid only for an authenticated user.
+        # Someone probably linked a video they opened from their Watch Later,
+        # but we can't get any info about their queue. Silently ignore.
+        # Also silently ignore empty/falsy/None IDs, just in case.
+        return
+
     for n in range(num_retries + 1):
         try:
             result = bot.memory['youtube_api_client'].playlists().list(
