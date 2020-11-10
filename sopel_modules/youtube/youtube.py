@@ -188,7 +188,7 @@ def _say_video_result(bot, trigger, id_, include_link=True):
     result = result[0]
 
     # Formatting
-    snippet = result['snippet']
+    snippet = _make_snippet_bidi_safe(result['snippet'])
     details = result['contentDetails']
     statistics = result['statistics']
 
@@ -273,7 +273,7 @@ def _say_playlist_result(bot, trigger, id_):
         return
     result = result[0]
 
-    snippet = result['snippet']
+    snippet = _make_snippet_bidi_safe(result['snippet'])
     snippet['itemCount'] = result['contentDetails']['itemCount']  # cheating
 
     bot.say(
@@ -301,3 +301,41 @@ def _parse_published_at(bot, trigger, published):
         pubdate = datetime.datetime.strptime(published, '%Y-%m-%dT%H:%M:%SZ')
     return tools.time.format_time(bot.db, bot.config, nick=trigger.nick,
         channel=trigger.sender, time=pubdate)
+
+
+def _make_snippet_bidi_safe(snippet):
+    """Place "directional isolate" characters around text that might be RTL.
+
+    U+2068 "FIRST STRONG ISOLATE" tells the receiving client's text renderer
+    to choose directionality of this segment based on the first strongly
+    directional character it finds *after* this mark.
+
+    U+2069 is POP DIRECTIONAL ISOLATE, which tells the receiving client's text
+    renderer that this segment has ended, and it should go back to using the
+    directionality of the parent text segment.
+
+    Marking strings from the YouTube API that might contain RTL or
+    bidirectional text in this way minimizes the possibility of weird text
+    rendering/ordering in IRC clients' output due to renderers' incorrect
+    guesses about the directionality or flow of weakly directional or neutral
+    characters like digits, punctuation, and whitespace.
+
+    Weird text wrapping in lines with long opposite-direction phrases that
+    cross visual line breaks may still occur, and any values that *contain*
+    both RTL and LTR text might still render funny in other ways—but that's
+    really much farther into the weeds than we need to go. This should be
+    enough of a hint to clients' text rendering that the results won't
+    *completely* suck.
+
+    See https://github.com/sopel-irc/sopel-youtube/issues/30
+    """
+    keys = ['title', 'channelTitle']
+
+    for key in keys:
+        try:
+            snippet[key] = "\u2068" + snippet[key] + "\u2069"
+        except KeyError:
+            # no need to safeguard something that doesn't exist
+            pass
+
+    return snippet
