@@ -38,7 +38,27 @@ ISO8601_PERIOD_REGEX = re.compile(
     r"(?P<s>[0-9]+([,.][0-9]+)?S)?)?$")
 video_regex = re.compile(r'(youtube\.com/watch\S*v=|youtu\.be/)([\w-]+)')
 playlist_regex = re.compile(r'youtube\.com/(playlist|watch)\S*list=([\w-]+)')
+
+
 num_retries = 5
+
+
+# Playlist IDs that are generally only available to an authenticated user
+# and therefore aren't worth wasting API quota on trying to fetch
+IGNORE_PLAYLIST_IDS = [
+    'WL',  # Watch Later
+    'LL',  # Liked Videos
+    'FL',  # Favorites (might not be used any more? 11/2020)
+    'LM',  # YT Music likes
+]
+
+
+# Channel IDs that "belong" to YouTube itself, used as the "owner" for
+# auto-playlists like music mixes, channel mixes, etc. (which usually lack
+# proper metadata for things like creation date & item count)
+AUTO_PLAYLIST_OWNER_IDS = [
+    'UCBR8-60-B28hp2BmDPdntcQ',
+]
 
 
 def _get_http_error_message(exc):
@@ -272,11 +292,9 @@ def get_playlist_info(bot, trigger, match):
 
 
 def _say_playlist_result(bot, trigger, id_):
-    if not id_ or id_.upper() == 'WL':
-        # The playlist with ID of WL is valid only for an authenticated user.
-        # Someone probably linked a video they opened from their Watch Later,
-        # but we can't get any info about their queue. Silently ignore.
-        # Also silently ignore empty/falsy/None IDs, just in case.
+    if not id_ or id_.upper() in IGNORE_PLAYLIST_IDS:
+        # Some special "playlist IDs" only exist for an authenticated user.
+        # Also silently ignores empty/falsy IDs, just in case.
         return
 
     for n in range(num_retries + 1):
@@ -310,8 +328,17 @@ def _say_playlist_result(bot, trigger, id_):
     result = result[0]
 
     snippet = _make_snippet_bidi_safe(result['snippet'])
-    snippet['itemCount'] = result['contentDetails']['itemCount']  # cheating
 
+    # if owned by a known auto-playlist owner channel ID, say so, and skip
+    # unreliable metadata fields
+    if snippet['channelId'] in AUTO_PLAYLIST_OWNER_IDS:
+        bot.say(
+            "[YouTube] %s | Automatic Playlist/Mix" % snippet['title']
+        )
+        return
+
+    # if not, treat as normal
+    snippet['itemCount'] = result['contentDetails']['itemCount']  # cheating
     bot.say(
         "[YouTube] {snippet[title]} | Playlist by {snippet[channelTitle]} | "
         "{snippet[itemCount]} items | Created {pubDate}".format(
