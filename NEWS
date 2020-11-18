@@ -1,3 +1,10 @@
+Changes between 0.3.2 and 0.4.0
+===============================
+* Enhance live stream support (#28)
+* Add playlist handling (#29, #33)
+* Protect against bidirectional text (#31)
+
+
 Changes between 0.3.1 and 0.3.2
 ===============================
 * Clean up some problematic imports (#25)
