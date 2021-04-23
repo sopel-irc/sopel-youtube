@@ -36,7 +36,7 @@ ISO8601_PERIOD_REGEX = re.compile(
     r"((?:T)(?P<h>[0-9]+([,.][0-9]+)?H)?"
     r"(?P<m>[0-9]+([,.][0-9]+)?M)?"
     r"(?P<s>[0-9]+([,.][0-9]+)?S)?)?$")
-video_regex = re.compile(r'(youtube\.com/watch\S*v=|youtu\.be/)([\w-]+)')
+video_regex = re.compile(r'(?:youtube\.com/(?:watch\S*v=|shorts/)|youtu\.be/)([\w-]+)')
 playlist_regex = re.compile(r'youtube\.com/(playlist|watch)\S*list=([\w-]+)')
 
 
@@ -170,7 +170,7 @@ def video_search(bot, trigger):
 def get_video_info(bot, trigger, match=None):
     """Get information about the linked YouTube video."""
     match = match or trigger
-    _say_video_result(bot, trigger, match.group(2), include_link=False)
+    _say_video_result(bot, trigger, match.group(1), include_link=False)
 
 
 def _say_video_result(bot, trigger, id_, include_link=True):
