@@ -331,7 +331,8 @@ def _say_playlist_result(bot, trigger, id_):
 
     # if owned by a known auto-playlist owner channel ID, say so, and skip
     # unreliable metadata fields
-    if snippet['channelId'] in AUTO_PLAYLIST_OWNER_IDS:
+    channelId = snippet.get('channelId')
+    if channelId is None or channelId in AUTO_PLAYLIST_OWNER_IDS:
         bot.say(
             "[YouTube] %s | Automatic Playlist/Mix" % snippet['title']
         )
