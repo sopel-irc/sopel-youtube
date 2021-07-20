@@ -1,2 +1,2 @@
-sopel>=7.0,<8
+sopel>=7.1,<8
 google-api-python-client>=1.5.5,<1.8
