@@ -157,6 +157,13 @@ def video_search(bot, trigger):
                 return
             sleep(random() * 2**n)
             continue
+        except googleapiclient.errors.HttpError as e:
+            bot.say(_get_http_error_message(e))
+            return
+        except Exception as e:
+            # Catch-all, because enumerating all the possible exceptions is a waste of code lines
+            bot.say('Temporary error talking to YouTube: %s' % e)
+            return
         break
     results = results.get('items')
     if not results:
@@ -204,6 +211,10 @@ def _say_video_result(bot, trigger, id_, include_link=True):
             continue
         except googleapiclient.errors.HttpError as e:
             bot.say(_get_http_error_message(e))
+            return
+        except Exception as e:
+            # Catch-all, because enumerating all the possible exceptions is a waste of code lines
+            bot.say('Temporary error talking to YouTube: %s' % e)
             return
         break
     if not result:
@@ -321,6 +332,10 @@ def _say_playlist_result(bot, trigger, id_):
             continue
         except googleapiclient.errors.HttpError as e:
             bot.say(_get_http_error_message(e))
+            return
+        except Exception as e:
+            # Catch-all, because enumerating all the possible exceptions is a waste of code lines
+            bot.say('Temporary error talking to YouTube: %s' % e)
             return
         break
     if not result:
