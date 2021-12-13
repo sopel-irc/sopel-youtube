@@ -198,7 +198,7 @@ def _say_video_result(bot, trigger, id_, include_link=True):
                             'actualStartTime,concurrentViewers,scheduledStartTime'
                         '),'
                         'statistics('
-                            'viewCount,commentCount,likeCount,dislikeCount'
+                            'viewCount,commentCount,likeCount'
                         ')'
                     ')',
             ).execute().get('items')
@@ -277,16 +277,10 @@ def _say_video_result(bot, trigger, id_, include_link=True):
             if "likeCount" in statistics:
                 likes = int(statistics["likeCount"])
                 message += " | " + color("{:,}+".format(likes), colors.GREEN)
-            if "dislikeCount" in statistics:
-                dislikes = int(statistics["dislikeCount"])
-                message += " | " + color("{:,}-".format(dislikes), colors.RED)
         elif item == "votes":
             if "likeCount" in statistics:
                 likes = int(statistics["likeCount"])
                 message += " | {:,}+".format(likes)
-            if "dislikeCount" in statistics:
-                dislikes = int(statistics["dislikeCount"])
-                message += " | {:,}-".format(dislikes)
 
     if include_link:
         message = message + ' | Link: https://youtu.be/' + id_
