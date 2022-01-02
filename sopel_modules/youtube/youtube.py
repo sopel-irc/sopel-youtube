@@ -225,7 +225,7 @@ def _say_video_result(bot, trigger, id_, include_link=True):
     snippet = _make_snippet_bidi_safe(result['snippet'])
     details = result['contentDetails']
     statistics = result['statistics']
-    live_info = result.get('liveStreamingDetails', None)
+    live_info = result.get('liveStreamingDetails', {})
     live_status = snippet["liveBroadcastContent"]
 
     message = "[YouTube] " + snippet["title"]
@@ -259,14 +259,14 @@ def _say_video_result(bot, trigger, id_, include_link=True):
                     datetime.utcnow() - _parse_datetime(live_info["actualStartTime"])
                     )[:-4]  # Sopel should make the leading "in"/trailing "ago" optional
         elif item == "views":
-            if live_status == "none":
+            if live_status == "none" and "viewCount" in statistics:
                 message += " | {:,} views".format(int(statistics["viewCount"]))
             elif live_status == "upcoming":
                 # users can "wait" for a live stream to start, and YouTube will show
                 # how many there are on the video page, but that info doesn't appear
                 # to be available in API responses (scumbag move alert)
                 continue
-            elif live_status == "live":
+            elif live_status == "live" and "concurrentViewers" in live_info:
                 message += " | {:,} watching".format(int(live_info["concurrentViewers"]))
         elif item == "comments" and "commentCount" in statistics:
             if live_status == "none":
