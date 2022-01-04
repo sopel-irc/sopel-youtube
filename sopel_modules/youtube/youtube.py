@@ -226,7 +226,7 @@ def _say_video_result(bot, trigger, id_, include_link=True):
     details = result['contentDetails']
     statistics = result['statistics']
     live_info = result.get('liveStreamingDetails', {})
-    live_status = snippet["liveBroadcastContent"]
+    live_status = snippet.get('liveBroadcastContent', 'none')
 
     message = "[YouTube] " + snippet["title"]
 
