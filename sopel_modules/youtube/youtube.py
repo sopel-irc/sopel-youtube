@@ -273,14 +273,10 @@ def _say_video_result(bot, trigger, id_, include_link=True):
                 # live videos tend to have chats, not comments, so only show this
                 # if the video is not live-streaming
                 message += " | {:,} comments".format(int(statistics["commentCount"]))
-        elif item == "votes_color":
-            if "likeCount" in statistics:
-                likes = int(statistics["likeCount"])
-                message += " | " + color("{:,}+".format(likes), colors.GREEN)
-        elif item == "votes":
-            if "likeCount" in statistics:
-                likes = int(statistics["likeCount"])
-                message += " | {:,}+".format(likes)
+        elif item in ("likes", "votes_color", "votes") and "likeCount" in statistics:
+            # TODO: votes and votes_color died with the API's dislike count
+            # so remove them after some appropriate amount of time (v0.5.0-ish)
+            message += " | {:,} likes".format(int(statistics["likeCount"]))
 
     if include_link:
         message = message + ' | Link: https://youtu.be/' + id_
