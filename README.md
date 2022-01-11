@@ -46,6 +46,12 @@ Unrecognized keywords are simply ignored. Supported `info_items` are:
 * `comments` (comment count)
 * `date` (upload time/date)
 * `length` (duration)
+* `likes` (count)
 * `uploader` (channel name)
 * `views` (view count)
-* `votes_color` or `votes` (likes/dislikes, with or without IRC formatting)
+
+### Legacy `info_items`
+Prior to YouTube's removal of public dislike counts, there were two vote-related
+`info_items`: `votes` and `votes_color`. These keywords are deprecated as of
+`sopel-youtube` 0.4.3. They will function as aliases to the new `likes` keyword
+until they are removed entirely in v0.5 or thereabouts.
