@@ -1,4 +1,12 @@
-Changes between 0.4.1 and 0.4.1
+Changes between 0.4.2 and 0.4.3
+===============================
+* Remove handling of dislikes, which YouTube removed from its API (#45)
+* Make live-stream handling more robust, again (#48)
+* Replace `votes` and `votes_color` keywords in `info_items` with `votes` (#49)
+  * The old keywords will function as aliases until at least plugin version 0.5.0
+
+
+Changes between 0.4.1 and 0.4.2
 ===============================
 * Improve error handling (#44)
 
