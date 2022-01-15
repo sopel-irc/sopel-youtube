@@ -367,10 +367,22 @@ def _parse_datetime(date):
 
 
 def _format_datetime(bot, trigger, date):
-    if type(date) != 'datetime':
+    if not isinstance(date, datetime):
         date = _parse_datetime(date)
-    return tools.time.format_time(bot.db, bot.config, nick=trigger.nick,
-        channel=trigger.sender, time=date)
+    # use channel or bot's timezone (not user)
+    zone = tools.time.get_timezone(
+        db=bot.db,
+        config=bot.config,
+        channel=trigger.sender,
+    )
+    # use channel or bot's time format (not user)
+    return tools.time.format_time(
+        bot.db,
+        bot.config,
+        zone,
+        channel=trigger.sender,
+        time=date,
+    )
 
 
 def _make_snippet_bidi_safe(snippet):
