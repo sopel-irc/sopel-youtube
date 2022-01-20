@@ -12,6 +12,7 @@ import googleapiclient.discovery
 import googleapiclient.errors
 
 from sopel.config.types import (
+    BooleanAttribute,
     ListAttribute,
     StaticSection,
     ValidatedAttribute,
@@ -93,7 +94,7 @@ class YoutubeSection(StaticSection):
     Available: uploader, date, length, views, comments, and votes_color or votes
     """
 
-    playlist_watch = ValidatedAttribute('playlist_watch', bool, default=True)
+    playlist_watch = BooleanAttribute('playlist_watch', default=True)
     """
     Whether to show playlist info if the list ID is embedded in a video watch link.
     """
