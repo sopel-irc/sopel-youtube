@@ -19,7 +19,7 @@ from sopel.config.types import (
     NO_DEFAULT,
 )
 from sopel.formatting import color, colors
-from sopel.module import commands, example, url
+from sopel.plugin import commands, example, url
 import sopel.tools as tools
 import sopel.tools.time
 
