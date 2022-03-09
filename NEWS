@@ -1,3 +1,13 @@
+Changes between 0.4.3 and 0.5.0
+===============================
+* Prep for Sopel 8:
+  * Require Sopel 7.1+; Sopel 7.0 is no longer supported
+  * Use `BooleanAttribute` setting type (#41)
+  * Switch from `sopel.module` to `sopel.plugin` (#42)
+* Format time according to the channel's preference, w/fallback to bot setting (#50)
+* Permit newer `google-api-python-client` library versions (#51)
+
+
 Changes between 0.4.2 and 0.4.3
 ===============================
 * Remove handling of dislikes, which YouTube removed from its API (#45)
