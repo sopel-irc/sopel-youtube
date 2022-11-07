@@ -5,14 +5,11 @@ YouTube plugin for Sopel
 """
 from __future__ import unicode_literals, absolute_import, division, print_function
 
-try:
-    from .youtube import *
-except ImportError:
-    # probably being imported by setup.py to get metadata before installation
-    # no cause for alarm
-    pass
+# replace with `importlib_metadata` when updating for Sopel 8.0
+import pkg_resources
+
+from .youtube import *
 
 __author__ = 'dgw'
 __email__ = 'dgw@technobabbl.es'
-__version__ = '0.5.0'
-
+__version__ = pkg_resources.get_distribution('sopel_modules.youtube').version
