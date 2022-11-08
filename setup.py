@@ -28,7 +28,7 @@ with open('dev-requirements.txt') as dev_requirements_file:
 
 setup(
     name='sopel_modules.youtube',
-    version='0.5.0',
+    version='0.5.1',
     description='YouTube plugin for Sopel',
     long_description=readme + '\n\n' + history,
     long_description_content_type='text/markdown',

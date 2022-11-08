@@ -276,7 +276,7 @@ def _say_video_result(bot, trigger, id_, include_link=True):
                 message += " | {:,} comments".format(int(statistics["commentCount"]))
         elif item in ("likes", "votes_color", "votes") and "likeCount" in statistics:
             # TODO: votes and votes_color died with the API's dislike count
-            # so remove them after some appropriate amount of time (v0.5.0-ish)
+            # so remove them after some appropriate amount of time (v0.6.0-ish)
             message += " | {:,} likes".format(int(statistics["likeCount"]))
 
     if include_link:
