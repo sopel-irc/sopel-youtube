@@ -1,22 +1,26 @@
 # sopel-youtube
 
-YouTube info plugin for Sopel
+YouTube link information plugin for Sopel.
 
 ## Installing
 
-If possible, use `pip` to install this plugin. Below are example commands; you
-might need to add `sudo` and/or call a different `pip` (e.g. `pip3`) depending
-on your system and environment. Do not use `setup.py install`; Sopel won't be
-able to load the plugin correctly.
+Releases are hosted on PyPI, so after installing Sopel, all you need is `pip`:
 
-### Published release
+```shell
+$ pip install sopel-modules.youtube
+```
 
-    pip install sopel_modules.youtube
+(Make sure you use the "correct" `pip`, i.e. the one corresponding to the Python
+environment where you have Sopel installed.)
 
-### From source
+### Latest source
 
-    # Clone the repo, then run this in /path/to/sopel-youtube
-    pip install .
+If you want to help develop or test the plugin, you'll need to install from
+source. Clone the repo first, then:
+
+```shell
+$ pip install -e .
+```
 
 ## Getting your API key
 Go to the [Google Developers Console](https://console.developers.google.com/)
@@ -24,10 +28,11 @@ and create an application. When it's created, go to the APIs section, select
 the YouTube Data API and enable it. Then go to the Credentials section,
 select "Add credentials", pick "API key", and then "Server key". You can enter
 a name for it and limit the IPs it can be used from, but you don't have to.
-Copy the value it gives you into the prompt in the config wizard, or the
-`api_key` value of the config in the `[youtube]` section.
+Copy the value it gives you into the prompt in the config wizard (see below),
+or the `api_key` field of the config file's `[youtube]` section.
 
-## Config settings
+## Configuring the plugin
+
 `sopel-youtube` supports Sopel's interactive configuration wizard:
 
     sopel-plugins configure youtube
