@@ -22,6 +22,20 @@ source. Clone the repo first, then:
 $ pip install -e .
 ```
 
+#### Testing changes
+
+To run tests, make sure you have the development dependencies as well:
+
+```shell
+$ pip install -r dev-requirements.txt
+```
+
+Run the test suite from the repo root directory:
+
+```shell
+$ pytest -v .
+```
+
 ## Getting your API key
 Go to the [Google Developers Console](https://console.developers.google.com/)
 and create an application. When it's created, go to the APIs section, select
