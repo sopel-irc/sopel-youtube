@@ -21,10 +21,8 @@ from sopel.config.types import (
     ValidatedAttribute,
     NO_DEFAULT,
 )
-from sopel.formatting import color, colors
 from sopel.plugin import commands, example, url
 import sopel.tools as tools
-import sopel.tools.time
 
 if sys.version_info.major < 3:
     int = long
