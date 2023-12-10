@@ -353,7 +353,7 @@ def _say_playlist_result(bot, trigger, id_):
         "[YouTube] {snippet[title]} | Playlist by {snippet[channelTitle]} | "
         "{snippet[itemCount]} items | Created {pubDate}".format(
             snippet=snippet,
-            pubDate=_parse_published_at(bot, trigger, snippet['publishedAt']),
+            pubDate=_parse_datetime(bot, trigger, snippet['publishedAt']),
         )
     )
 
