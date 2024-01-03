@@ -13,6 +13,7 @@ from time import sleep
 
 import googleapiclient.discovery
 import googleapiclient.errors
+import httplib2
 
 from sopel.config.types import (
     BooleanAttribute,
@@ -151,7 +152,7 @@ def video_search(bot, trigger):
                 part='id',
                 fields='items(id(videoId))',
                 maxResults=1,
-            ).execute()
+            ).execute(http=httplib2.Http())
         except ConnectionError:
             if n >= num_retries:
                 bot.say('Maximum retries exceeded while searching YouTube for '
@@ -203,7 +204,11 @@ def _say_video_result(bot, trigger, id_, include_link=True):
                             'viewCount,commentCount,likeCount'
                         ')'
                     ')',
-            ).execute().get('items')
+            # googleapiclient uses httplib2, which isn't thread-safe.
+            # https://googleapis.github.io/google-api-python-client/docs/thread_safety.html
+            # In a multi-threaded environment like Sopel, with the basic api_key authentication,
+            # the simplest workaround is to pass a fresh httplib2.Http() client for each query.
+            ).execute(http=httplib2.Http()).get('items')
         except ConnectionError:
             if n >= num_retries:
                 bot.say('Maximum retries exceeded fetching YouTube video {}, '
@@ -314,6 +319,10 @@ def _say_playlist_result(bot, trigger, id_):
                             'itemCount'
                         ')'
                     ')',
+            # googleapiclient uses httplib2, which isn't thread-safe.
+            # https://googleapis.github.io/google-api-python-client/docs/thread_safety.html
+            # In a multi-threaded environment like Sopel, with the basic api_key authentication,
+            # the simplest workaround is to pass a fresh httplib2.Http() client for each query.
             ).execute().get('items')
         except ConnectionError:
             if n >= num_retries:
