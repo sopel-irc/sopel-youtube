@@ -1,9 +1,8 @@
-# coding=utf8
 """sopel-youtube
 
 YouTube link information plugin for Sopel.
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import annotations
 
 from datetime import datetime
 from random import random
@@ -13,7 +12,7 @@ from time import sleep
 
 import googleapiclient.discovery
 import googleapiclient.errors
-import httplib2
+import httplib2  # dependency of googleapiclient
 
 from sopel.config.types import (
     BooleanAttribute,
@@ -23,10 +22,7 @@ from sopel.config.types import (
     NO_DEFAULT,
 )
 from sopel.plugin import commands, example, url
-import sopel.tools as tools
-
-if sys.version_info.major < 3:
-    int = long
+from sopel import tools
 
 
 ISO8601_PERIOD_REGEX = re.compile(
@@ -117,6 +113,7 @@ def configure(config):
 
 def setup(bot):
     bot.config.define_section('youtube', YoutubeSection)
+
     if 'youtube_api_client' not in bot.memory:
         reason = None
         try:
@@ -144,6 +141,7 @@ def video_search(bot, trigger):
     """Search YouTube"""
     if not trigger.group(2):
         return
+
     for n in range(num_retries + 1):
         try:
             results = bot.memory['youtube_api_client'].search().list(
@@ -168,6 +166,7 @@ def video_search(bot, trigger):
             bot.say('Temporary error talking to YouTube: %s' % e)
             return
         break
+
     results = results.get('items')
     if not results:
         bot.say("I couldn't find any YouTube videos for your query.")
@@ -287,6 +286,7 @@ def _say_video_result(bot, trigger, id_, include_link=True):
 
     if include_link:
         message = message + ' | Link: https://youtu.be/' + id_
+
     bot.say(message)
 
 
@@ -339,10 +339,11 @@ def _say_playlist_result(bot, trigger, id_):
             bot.say('Temporary error talking to YouTube: %s' % e)
             return
         break
+
     if not result:
         return
-    result = result[0]
 
+    result = result[0]
     snippet = _make_snippet_bidi_safe(result['snippet'])
 
     # if owned by a known auto-playlist owner channel ID, say so, and skip
