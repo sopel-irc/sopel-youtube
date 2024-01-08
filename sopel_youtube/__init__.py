@@ -280,9 +280,7 @@ def _say_video_result(bot, trigger, id_, include_link=True):
                 # live videos tend to have chats, not comments, so only show this
                 # if the video is not live-streaming
                 message += " | {:,} comments".format(int(statistics["commentCount"]))
-        elif item in ("likes", "votes_color", "votes") and "likeCount" in statistics:
-            # TODO: votes and votes_color died with the API's dislike count
-            # so remove them after some appropriate amount of time (v0.6.0-ish)
+        elif item == "likes" and "likeCount" in statistics:
             message += " | {:,} likes".format(int(statistics["likeCount"]))
 
     if include_link:
