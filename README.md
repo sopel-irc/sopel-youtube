@@ -1,6 +1,12 @@
 # sopel-youtube
 
-YouTube info plugin for Sopel
+Legacy YouTube info plugin for Sopel
+
+## IMPORTANT
+
+**This version of the plugin is no longer maintained. When you are ready to
+upgrade to Sopel 8.0+, please uninstall `sopel-modules.youtube` and install
+[`sopel-youtube`](https://pypi.org/project/sopel-youtube/) instead.**
 
 ## Installing
 

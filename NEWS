@@ -1,3 +1,7 @@
+Changes between 0.5.1 and 0.5.2
+===============================
+* Document `sopel_modules.youtube` end-of-life and transition to `sopel-youtube`
+
 Changes between 0.5.0 and 0.5.1
 ===============================
 * Fix hiding load-time import errors (#52)
