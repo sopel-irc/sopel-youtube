@@ -7,11 +7,17 @@ YouTube link information plugin for Sopel.
 Releases are hosted on PyPI, so after installing Sopel, all you need is `pip`:
 
 ```shell
-$ pip install sopel-modules.youtube
+$ pip install sopel-youtube
 ```
 
 (Make sure you use the "correct" `pip`, i.e. the one corresponding to the Python
 environment where you have Sopel installed.)
+
+### Migrating from `sopel-modules.youtube`
+
+You can simply `pip uninstall sopel-modules.youtube` prior to installing this
+package; no extra steps should be needed. `sopel-youtube` inherits the
+configuration section originally defined and used by the older versions.
 
 ### Latest source
 

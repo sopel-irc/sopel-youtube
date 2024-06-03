@@ -14,7 +14,7 @@ readme = { file=["README.md", "NEWS"], content-type="text/markdown" }
 
 [project]
 name = "sopel-youtube"
-version = "0.5.1"
+version = "0.6.0"
 description = "YouTube link information plugin for Sopel."
 keywords = [
   "sopel",

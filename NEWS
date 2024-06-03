@@ -1,3 +1,12 @@
+Changes between 0.5.1 and 0.6.0
+===============================
+* New package name: `sopel-youtube` replaces `sopel-modules.youtube` (#55, #67)
+* Sopel 8.0+ now required (#57, #65)
+* Improve link handling (#56, #58)
+* Improve thread-safety (#63)
+* Fix date parsing error for playlists (#62)
+
+
 Changes between 0.5.0 and 0.5.1
 ===============================
 * Fix hiding load-time import errors (#52)
