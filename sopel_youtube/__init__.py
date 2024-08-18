@@ -7,7 +7,6 @@ from __future__ import annotations
 from datetime import datetime
 from random import random
 import re
-import sys
 from time import sleep
 
 import googleapiclient.discovery
@@ -23,6 +22,9 @@ from sopel.config.types import (
 )
 from sopel.plugin import commands, example, url
 from sopel import tools
+
+
+LOGGER = tools.get_logger('youtube')
 
 
 ISO8601_PERIOD_REGEX = re.compile(
@@ -129,16 +131,13 @@ def setup(bot):
     bot.config.define_section('youtube', YoutubeSection)
 
     if 'youtube_api_client' not in bot.memory:
-        reason = None
         try:
             bot.memory['youtube_api_client'] = googleapiclient.discovery.build(
                 "youtube", "v3",
                 developerKey=bot.config.youtube.api_key,
                 cache_discovery=False)
         except googleapiclient.errors.HttpError as e:
-            reason = _get_http_error_message(e)
-        if reason:  # TODO: Replace with `raise ... from` when dropping py2
-            raise ValueError(reason)
+            raise ValueError(e.reason) from e
     else:
         # If the memory key is already in use, either we have a plugin conflict
         # or something has gone very wrong. Bail either way.
@@ -228,6 +227,7 @@ def _say_comment_result(bot, trigger, id_):
             continue
         except googleapiclient.errors.HttpError as e:
             bot.say(_get_http_error_message(e))
+            LOGGER.error(e.reason)
             return
         except Exception as e:
             # Catch-all, because enumerating all the possible exceptions is a waste of code lines
@@ -286,6 +286,7 @@ def _say_video_result(bot, trigger, id_, include_link=True):
             continue
         except googleapiclient.errors.HttpError as e:
             bot.say(_get_http_error_message(e))
+            LOGGER.error(e.reason)
             return
         except Exception as e:
             # Catch-all, because enumerating all the possible exceptions is a waste of code lines
@@ -400,6 +401,7 @@ def _say_playlist_result(bot, trigger, id_):
             continue
         except googleapiclient.errors.HttpError as e:
             bot.say(_get_http_error_message(e))
+            LOGGER.error(e.reason)
             return
         except Exception as e:
             # Catch-all, because enumerating all the possible exceptions is a waste of code lines
