@@ -35,7 +35,13 @@ ISO8601_PERIOD_REGEX = re.compile(
     r"((?:T)(?P<h>[0-9]+([,.][0-9]+)?H)?"
     r"(?P<m>[0-9]+([,.][0-9]+)?M)?"
     r"(?P<s>[0-9]+([,.][0-9]+)?S)?)?$")
-video_regex = re.compile(r'(?:youtube\.com/(?:watch\S*v=|shorts/|live/)|youtu\.be/)([\w-]+)')
+video_regex = re.compile(
+    r'''
+    (?:
+      (?:youtube\.com/(?:shorts/|live/)|youtu\.be/)(?P<video1>[\w-]+)|
+      youtube\.com/watch/?(?:\S*[?&]v=(?P<video2>[\w-]+)|\S*[?&]lc=(?P<comment>[\w_-]+))+
+    )
+    ''', re.VERBOSE)
 playlist_regex = re.compile(r'youtube\.com/(playlist|watch)\S*list=([\w-]+)')
 
 
@@ -97,6 +103,11 @@ class YoutubeSection(StaticSection):
     Whether to show playlist info if the list ID is embedded in a video watch link.
     """
 
+    comment_watch = BooleanAttribute('comment_watch', default=False)
+    """
+    Whether to also show video info when video ID is included in a comment link.
+    """
+
 
 def configure(config):
     config.define_section('youtube', YoutubeSection, validate=False)
@@ -107,7 +118,10 @@ def configure(config):
         "info_items", "Which attributes to show in response to video links"
     )
     config.youtube.configure_setting(
-        "playlist_watch", "Show playlist info if embedded in video links?"
+        "playlist_watch", "Show playlist info if included in a video link?"
+    )
+    config.youtube.configure_setting(
+        "comment_watch", "Show video info if included in a comment link?"
     )
 
 
@@ -179,7 +193,62 @@ def video_search(bot, trigger):
 def get_video_info(bot, trigger, match=None):
     """Get information about the linked YouTube video."""
     match = match or trigger
-    _say_video_result(bot, trigger, match.group(1), include_link=False)
+    comment = match.group('comment')
+    video = match.group('video1') or match.group('video2')
+
+    if comment:
+        _say_comment_result(bot, trigger, comment)
+        if not bot.settings.youtube.comment_watch:
+            return
+
+    if video:
+        _say_video_result(bot, trigger, video, include_link=False)
+
+
+def _say_comment_result(bot, trigger, id_):
+    for n in range(num_retries + 1):
+        try:
+            result = bot.memory['youtube_api_client'].comments().list(
+                id=id_,
+                part='id,snippet',
+                fields=
+                    'items('
+                        'snippet('
+                            'authorDisplayName,likeCount,publishedAt,textDisplay'
+                        ')'
+                    ')',
+                textFormat='plainText',
+            ).execute(http=httplib2.Http()).get('items')
+        except ConnectionError:
+            if n >= num_retries:
+                bot.say('Maximum retries exceeded fetching YouTube video {}, '
+                        'please try again later.'.format(id_))
+                return
+            sleep(random() * 2**n)
+            continue
+        except googleapiclient.errors.HttpError as e:
+            bot.say(_get_http_error_message(e))
+            return
+        except Exception as e:
+            # Catch-all, because enumerating all the possible exceptions is a waste of code lines
+            bot.say('Temporary error talking to YouTube: %s' % e)
+            return
+        break
+    if not result:
+        return
+    result = result[0]
+
+    # Formatting
+    snippet = result['snippet']
+    author = snippet['authorDisplayName']
+    likes = snippet['likeCount']
+    published = _format_datetime(bot, trigger, snippet["publishedAt"])
+    text = snippet['textDisplay']
+
+    message = '[YouTube] {author}: {text}'.format(author=author, text=text)
+    end = ' | 👍 {likes} | {date}'.format(likes=likes, date=published)
+
+    bot.say(message, truncation='…', trailing=end)
 
 
 def _say_video_result(bot, trigger, id_, include_link=True):
