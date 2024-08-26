@@ -43,13 +43,26 @@ $ pytest -v .
 ```
 
 ## Getting your API key
-Go to the [Google Developers Console](https://console.developers.google.com/)
-and create an application. When it's created, go to the APIs section, select
-the YouTube Data API and enable it. Then go to the Credentials section,
-select "Add credentials", pick "API key", and then "Server key". You can enter
-a name for it and limit the IPs it can be used from, but you don't have to.
-Copy the value it gives you into the prompt in the config wizard (see below),
-or the `api_key` field of the config file's `[youtube]` section.
+
+1. Go to the [Google Cloud APIs & Services Console][cloud-api-console] and
+   create a new project for your bot (or select an existing one, if you prefer).
+2. [Visit the API Library][api-library-query], find "YouTube Data API v3" (or
+   [click here][api-library-direct]), and enable it.
+3. Go to the [Credentials section][api-credentials], click "+ Create
+   Credentials", and choose "API key" from the menu. You can enter a name for
+   the new key and limit the IPs it can be used from, but you don't have to.
+4. Copy the new key and paste it into the appropriate prompt in the config
+   wizard (see below), or the `api_key` field under `[youtube]` in your bot's
+   config file.
+5. **Optional:** If the ⚠️ icon next to your new key in the Cloud Console annoys
+   you, it changes to a checkmark if you [restrict][api-key-restrictions] the
+   key's access to only the API(s) it needs.
+
+[cloud-api-console]: https://console.cloud.google.com/apis/dashboard
+[api-library-query]: https://console.cloud.google.com/apis/library/browse?q=youtube
+[api-library-direct]: https://console.cloud.google.com/apis/library/youtube.googleapis.com
+[api-credentials]: https://console.cloud.google.com/apis/credentials
+[api-key-restrictions]: https://cloud.google.com/docs/authentication/api-keys#adding-api-restrictions
 
 ## Configuring the plugin
 
@@ -57,7 +70,7 @@ or the `api_key` field of the config file's `[youtube]` section.
 
     sopel-plugins configure youtube
 
-The `api_key` option is self-explanatory (see above).
+The `api_key` option is self-explanatory (see above for how to get one).
 
 If video "watch" links contain a playlist ID, the plugin will show the
 playlist info as well as the video info by default. To disable this, set
