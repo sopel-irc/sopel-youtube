@@ -14,7 +14,7 @@ readme = { file=["README.md", "NEWS"], content-type="text/markdown" }
 
 [project]
 name = "sopel-youtube"
-version = "0.6.0"
+version = "0.7.0.dev0"
 description = "YouTube link information plugin for Sopel."
 keywords = [
   "sopel",
@@ -46,11 +46,12 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
     "Topic :: Communications :: Chat :: Internet Relay Chat",
 ]
 requires-python = ">=3.8, <4"
 dependencies = [
-    "sopel>=8.0,<9",
+    "sopel>=8.0",
     "google-api-python-client>=1.5.5,<3",
 ]
 
