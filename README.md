@@ -76,6 +76,10 @@ If video "watch" links contain a playlist ID, the plugin will show the
 playlist info as well as the video info by default. To disable this, set
 `playlist_watch` to `False`.
 
+If video "watch" links contain a comment ID, the plugin will **only** show info
+about the comment by default. If you also want video info posted in this
+situation, set `comment_watch` to `True`.
+
 For videos, by default, only the video length, uploader (channel name), view
 count, and upload date are shown. The included items, and the order in which
 they appear, depend on the `info_items` setting, which is a list of keywords.
