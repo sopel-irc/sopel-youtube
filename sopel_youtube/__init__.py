@@ -7,7 +7,6 @@ from __future__ import annotations
 from datetime import datetime
 from random import random
 import re
-import sys
 from time import sleep
 
 import googleapiclient.discovery
@@ -25,6 +24,7 @@ from sopel.plugin import commands, example, url
 from sopel import tools
 
 
+LOGGER = tools.get_logger('youtube')
 ISO8601_PERIOD_REGEX = re.compile(
     r"^(?P<sign>[+-])?"
     r"P(?!\b)"
@@ -155,15 +155,34 @@ def video_search(bot, trigger):
             if n >= num_retries:
                 bot.say('Maximum retries exceeded while searching YouTube for '
                         '"{}", please try again later.'.format(trigger.group(2)))
+                LOGGER.error(
+                    'Max retries exceeded searching YouTube for %r',
+                    trigger.group(2),
+                )
                 return
+            LOGGER.warning(
+                'Connection error searching YouTube for %r; '
+                'waiting random time before retry...',
+                trigger.group(2),
+            )
             sleep(random() * 2**n)
             continue
         except googleapiclient.errors.HttpError as e:
             bot.say(_get_http_error_message(e))
+            LOGGER.exception(
+                'HTTP error searching YouTube for %r: %s',
+                trigger.group(2),
+                e,
+            )
             return
         except Exception as e:
             # Catch-all, because enumerating all the possible exceptions is a waste of code lines
             bot.say('Temporary error talking to YouTube: %s' % e)
+            LOGGER.exception(
+                'Error searching YouTube for %r: %s',
+                trigger.group(2),
+                e,
+            )
             return
         break
 
@@ -212,15 +231,34 @@ def _say_video_result(bot, trigger, id_, include_link=True):
             if n >= num_retries:
                 bot.say('Maximum retries exceeded fetching YouTube video {}, '
                         'please try again later.'.format(id_))
+                LOGGER.error(
+                    'Max retries exceeded fetching YouTube video %r',
+                    id_,
+                )
                 return
+            LOGGER.warning(
+                'Connection error fetching YouTube video %r; '
+                'waiting random time before retry...',
+                id_,
+            )
             sleep(random() * 2**n)
             continue
         except googleapiclient.errors.HttpError as e:
             bot.say(_get_http_error_message(e))
+            LOGGER.exception(
+                'HTTP error fetching YouTube video %r: %s',
+                id_,
+                e,
+            )
             return
         except Exception as e:
             # Catch-all, because enumerating all the possible exceptions is a waste of code lines
             bot.say('Temporary error talking to YouTube: %s' % e)
+            LOGGER.exception(
+                'Error searching YouTube for %r: %s',
+                id_,
+                e,
+            )
             return
         break
     if not result:
