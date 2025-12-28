@@ -205,11 +205,11 @@ def get_video_info(bot, trigger, match=None):
         _say_video_result(bot, trigger, video, include_link=False)
 
 
-def _say_comment_result(bot, trigger, id_):
+def _say_comment_result(bot, trigger, comment_id):
     for n in range(num_retries + 1):
         try:
             result = bot.memory['youtube_api_client'].comments().list(
-                id=id_,
+                id=comment_id,
                 part='id,snippet',
                 fields=
                     'items('
@@ -221,8 +221,8 @@ def _say_comment_result(bot, trigger, id_):
             ).execute(http=httplib2.Http()).get('items')
         except ConnectionError:
             if n >= num_retries:
-                bot.say('Maximum retries exceeded fetching YouTube video {}, '
-                        'please try again later.'.format(id_))
+                bot.say('Maximum retries exceeded fetching YouTube comment {}, '
+                        'please try again later.'.format(comment_id))
                 return
             sleep(random() * 2**n)
             continue
@@ -251,11 +251,11 @@ def _say_comment_result(bot, trigger, id_):
     bot.say(message, truncation='…', trailing=end)
 
 
-def _say_video_result(bot, trigger, id_, include_link=True):
+def _say_video_result(bot, trigger, video_id, include_link=True):
     for n in range(num_retries + 1):
         try:
             result = bot.memory['youtube_api_client'].videos().list(
-                id=id_,
+                id=video_id,
                 part='snippet,contentDetails,liveStreamingDetails,statistics',
                 fields=
                     'items('
@@ -280,7 +280,7 @@ def _say_video_result(bot, trigger, id_, include_link=True):
         except ConnectionError:
             if n >= num_retries:
                 bot.say('Maximum retries exceeded fetching YouTube video {}, '
-                        'please try again later.'.format(id_))
+                        'please try again later.'.format(video_id))
                 return
             sleep(random() * 2**n)
             continue
@@ -352,7 +352,7 @@ def _say_video_result(bot, trigger, id_, include_link=True):
             message += " | {:,} likes".format(int(statistics["likeCount"]))
 
     if include_link:
-        message = message + ' | Link: https://youtu.be/' + id_
+        message = message + ' | Link: https://youtu.be/' + video_id
 
     bot.say(message)
 
@@ -366,8 +366,8 @@ def get_playlist_info(bot, trigger, match):
     _say_playlist_result(bot, trigger, match.group(2))
 
 
-def _say_playlist_result(bot, trigger, id_):
-    if not id_ or id_.upper() in IGNORE_PLAYLIST_IDS:
+def _say_playlist_result(bot, trigger, playlist_id):
+    if not playlist_id or playlist_id.upper() in IGNORE_PLAYLIST_IDS:
         # Some special "playlist IDs" only exist for an authenticated user.
         # Also silently ignores empty/falsy IDs, just in case.
         return
@@ -375,7 +375,7 @@ def _say_playlist_result(bot, trigger, id_):
     for n in range(num_retries + 1):
         try:
             result = bot.memory['youtube_api_client'].playlists().list(
-                id=id_,
+                id=playlist_id,
                 part='snippet,contentDetails',
                 fields=
                     'items('
@@ -394,7 +394,7 @@ def _say_playlist_result(bot, trigger, id_):
         except ConnectionError:
             if n >= num_retries:
                 bot.say('Maximum retries exceeded fetching YouTube playlist {}, '
-                        'please try again later.'.format(id_))
+                        'please try again later.'.format(playlist_id))
                 return
             sleep(random() * 2**n)
             continue
